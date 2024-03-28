@@ -1,13 +1,8 @@
---[[pod_format="raw",created="2024-03-21 03:40:46",modified="2024-03-28 20:19:00",revision=3780]]
+--[[pod_format="raw",created="2024-03-21 03:40:46",modified="2024-03-28 23:36:41",revision=3808]]
 --[[
 
 0.1.0	
 
-move some solitaire suite specific things to a different folder
-	confetti
-	rule cards
-	rolling score
-	
 prepare comment for post
 	explaining 0.2 and how to add new game types
 	also allow collaboration for music

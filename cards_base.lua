@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-03-28 20:19:00",revision=12421]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-03-28 23:36:41",revision=12456]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
@@ -76,6 +76,7 @@ function cards_api_mouse_update(interact)
 	local mouse_down = md & ~mouse_last
 	local mouse_up = ~md & mouse_last
 	local double_click = time() - mouse_last_click < 0.3	
+	local clicked = false
 	
 	-- fix mouse interaction based on camera
 	local cx, cy = camera()
@@ -100,7 +101,6 @@ function cards_api_mouse_update(interact)
 		
 	if interact then
 		if mouse_down&1 == 1 and not held_stack then
-			local clicked = false
 			
 			if not cards_frozen then
 				for i = #cards_all, 1, -1 do

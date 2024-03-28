@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-03-27 02:28:13",revision=11601]]
+--[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-03-28 23:55:19",revision=11603]]
 
 stacks_all = {}
 stack_border = 3
@@ -14,6 +14,7 @@ perm = if the stack is removed when there is no more cards
 stack_rule = function called when another stack of cards is placed on top (with restrictions)
 on_click = function called when stack base or card in stack is clicked
 on_double = function caled when stack base or card in stack is double clicked
+resolve_stack = called when can_stack returns true
 ]]
 
 function stack_new(sprites, x, y, repos, perm, stack_rule, on_click, on_double)

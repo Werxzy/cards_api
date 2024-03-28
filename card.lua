@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-03-26 23:43:00",revision=11522]]
+--[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-03-28 02:00:12",revision=11803]]
 
 card_width = 45
 card_height = 60
@@ -145,7 +145,26 @@ function card_back_animated(func, data)
 	-- this function may need to be changed in the future
 	data.update = function(init)
 		-- will be true when the card back needs to change resolution or be initilized
-		func(init, data)
+		if init or not data.sprite then
+			data.sprite = userdata("u8", card_width, card_height)
+		end
+		
+		-- prepare card art to be updated
+		set_draw_target(data.sprite)
+		camera(-2,-2)
+		card_art_width, card_art_height = card_width-4, card_height-4
+		clip(2,2, card_art_width, card_art_height)
+		
+		local upd = func(init, data)
+		
+		camera()
+		clip()
+		if upd then -- add card border
+			nine_slice(25, 0, 0, card_width, card_height, 0)
+		end
+		
+		set_draw_target()
+		
 	end
 	
 	data.update(true)

@@ -1,12 +1,9 @@
---[[pod_format="raw",created="2024-03-21 03:40:46",modified="2024-03-27 23:01:47",revision=3648]]
+--[[pod_format="raw",created="2024-03-21 03:40:46",modified="2024-03-28 04:03:28",revision=3709]]
 --[[
 
 0.1.0	
-
-clean up card back generation by function (instead of sprite)
 	
 move save data into appdata/**/saves
-move card api to it's own repository
 
 0.1.?
 

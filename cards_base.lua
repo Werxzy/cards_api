@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-03-28 02:00:12",revision=12265]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-03-28 04:03:28",revision=12356]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
@@ -256,14 +256,15 @@ end
 -- grabs the requested save file
 -- ensures that the proper folder exists
 -- returns nil if save does not exist
-function cards_api_load()
+function cards_api_load(extra_folder)
 	assert(cards_api_save_folder, "Save location must be specified.")
 	
-	cards_api_saveloc = cards_api_save_folder .. "/"
+	cards_api_saveloc = cards_api_save_folder .. "/saves/"
 		.. cards_api_game_name .. ".pod"
 	
 	if cards_api_save_folder and #cards_api_save_folder > 0 then
 		mkdir(cards_api_save_folder)
+		mkdir(cards_api_save_folder .. "/saves")
 	end
 	
 	return fetch(cards_api_saveloc)

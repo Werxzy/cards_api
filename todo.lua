@@ -1,9 +1,19 @@
---[[pod_format="raw",created="2024-03-21 03:40:46",modified="2024-03-28 04:03:28",revision=3709]]
+--[[pod_format="raw",created="2024-03-21 03:40:46",modified="2024-03-28 20:19:00",revision=3780]]
 --[[
 
 0.1.0	
+
+move some solitaire suite specific things to a different folder
+	confetti
+	rule cards
+	rolling score
 	
-move save data into appdata/**/saves
+prepare comment for post
+	explaining 0.2 and how to add new game types
+	also allow collaboration for music
+add a readme to cards api explaining
+determine and add license to cards api
+	remember .txt
 
 0.1.?
 

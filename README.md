@@ -23,23 +23,23 @@ end
 -- called after any action is taken
 -- clicking, picking up a stack, letting go of a stack, animation finished, etc
 function game_action_resolved()
-  if not held_stack then
-    -- it's sometimes a good idea to not update an object when the player is holding a stack of cards
-  end
+	if not held_stack then
+		-- it's sometimes a good idea to not update an object when the player is holding a stack of cards
+	end
 end
 
 -- returns true when the game has reached a winning state
 -- called right after game_action_resolved
 -- when returning true, will set cards_frozen = true
 function game_win_condition()
-  return false
+	return false
 end
 
 -- cards_frozen will prevent any mouse interaction with cards
 
 -- called when game_win_condition returns true
 function game_count_win()
-  -- count score and/or play events
+	-- count score and/or play events
 end
 
 ```
@@ -140,12 +140,12 @@ stack_repose_static(y_delta) -- defaults (12)
 
 -- example of a card repositioning function
 function stack_repose_simple(stack)
-  local y = stack.y_to
-  for c in all(stack.cards) do
-    c.x_to = stack.x_to
-    c.y_to = y
-    y += 12
-  end
+	local y = stack.y_to
+	for c in all(stack.cards) do
+		c.x_to = stack.x_to
+		c.y_to = y
+		y += 12
+	end
 end
 
 -- moves a card from it's old stack or table to a new one

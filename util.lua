@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-26 04:14:49",modified="2024-03-28 20:19:00",revision=321]]
+--[[pod_format="raw",created="2024-03-26 04:14:49",modified="2024-03-29 07:11:37",revision=337]]
 -- returns the key of a searched value inside a table
 -- such that tab[has(tab, val)] == val
 function has(tab, val)
@@ -174,7 +174,8 @@ function folder_traversal(start_dir)
 			if cmd == "exit" then -- exits current directory early
 				exit_dir()
 			elseif cmd == "find" then -- returns true if a specific file is found
-				return has(ls(current_dir), a)
+				local l = ls(current_dir)
+				if(l) return has(l, a)
 			end
 			
 			return 
@@ -187,11 +188,12 @@ function folder_traversal(start_dir)
 		
 		while #current_dir >= #start_dir do
 			local list = ls(current_dir)
-			
-			for i, f in next, list, has(list, prev_folder) do
-				if not f:ext() then -- folder
-					current_dir ..= "/" .. f
-					return current_dir
+			if list then
+				for i, f in next, list, has(list, prev_folder) do
+					if not f:ext() then -- folder
+						current_dir ..= "/" .. f
+						return current_dir
+					end
 				end
 			end
 			

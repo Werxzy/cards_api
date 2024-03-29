@@ -1,11 +1,11 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-03-29 02:01:47",revision=12465]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-03-29 03:58:34",revision=12517]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
 include"cards_api/card.lua"
 include"cards_api/button.lua"
 
---cards_api_save_folder = "/appdata/solitaire_collection"
+--suite_save_folder = "/appdata/solitaire_collection"
 
 mouse_last = 0
 mouse_last_click = time() - 100
@@ -223,56 +223,6 @@ function cards_api_clear()
 	game_update = nil
 	game_draw = nil
 	cards_frozen = false
-end
-
-function cards_api_load_game(game_path)
-	-- example "cards_api/solitaire_basic.lua"
-	local path = split(game_path, "/")
-	path = path[#path]
-	path = split(path, ".")
-	
-	assert(path[2] == "lua")
-	
-	cards_api_game_name = path[1]
-	
-	include(game_path)
-	
-	game_load()
-	game_setup()
-end
-
-function cards_api_exit()
-	-- for that specific game
-	if(game_on_exit) game_on_exit()
-	
-	-- where to go next
-	if cards_game_exiting then
-		cards_game_exiting()
-	else
-		exit()
-	end
-end
-
--- grabs the requested save file
--- ensures that the proper folder exists
--- returns nil if save does not exist
-function cards_api_load(extra_folder)
-	assert(cards_api_save_folder, "Save location must be specified.")
-	
-	cards_api_saveloc = cards_api_save_folder .. "/saves/"
-		.. cards_api_game_name .. ".pod"
-	
-	if cards_api_save_folder and #cards_api_save_folder > 0 then
-		mkdir(cards_api_save_folder)
-		mkdir(cards_api_save_folder .. "/saves")
-	end
-	
-	return fetch(cards_api_saveloc)
-end
-
--- saves a table of data at established location
-function cards_api_save(data)
-	store(cards_api_saveloc, data)
 end
 
 function cards_api_shadows_enable(enable)

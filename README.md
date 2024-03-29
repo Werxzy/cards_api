@@ -3,17 +3,17 @@
 ```lua
 -- caled every _draw, giving control when to draw with layer
 function game_draw(layer)
-  if layer == 0 then
-    -- before anything else is drawn
-    -- make sure to call cls
-
-  elseif layer == 1 then
-    -- after stack sprites and buttons are drawn, before cards
-
-  elseif layer == 2 then
-    -- after cards are drawn, currently last layer
-    
-  end
+	if layer == 0 then
+		-- before anything else is drawn
+		-- make sure to call cls
+	
+	elseif layer == 1 then
+		-- after stack sprites and buttons are drawn, before cards
+	
+	elseif layer == 2 then
+		-- after cards are drawn, currently last layer
+	
+	end
 end
 
 -- called every _update, after card and mouse updates

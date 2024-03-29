@@ -149,9 +149,49 @@ function stack_repose_simple(stack)
 end
 
 -- moves a card from it's old stack or table to a new one
-function stack_add_card(stack, card, old_stack)
+stack_add_card(stack, card, old_stack)
 -- if old_stack is not nil and a table, card will be removed from that stack
 -- if old_stack is a number, the card will instead be inserted into that position in the new stack
 -- (this should probably be more refined)
 ```
 
+
+## Animations
+
+If you want to have a set of actions occur over time
+When an animation is occuring, no cards can be interacted with.
+
+```lua
+-- cards_coroutine contains the coroutine managed by the api
+
+--example inside game_setup
+function game_setup()
+
+	-- ...
+
+	-- creates a coroutine to be executed per frame
+	cards_coroutine = cocreate(game_setup_anim)
+	-- when the coroutine is done, game_action_resolved() will be called if it exists
+end
+
+--example from golf solitaire
+function game_setup_anim()
+	pause_frames(30) -- wait 30 frames
+	
+	for i = 1,5 do	
+		for s in all(stacks_supply) do
+			--  transfer a card from the stack
+			local c = get_top_card(deck_stack)
+			if(not c) break
+			stack_add_card(s, c)
+			c.a_to = 0 -- turn face up
+
+			pause_frames(3) -- wait 3 frames to allow it not to be instant
+		end
+		pause_frames(5) -- wait 5 frames for extra effect
+	end
+	
+	cards_api_game_started() -- lets the game start
+end
+
+```

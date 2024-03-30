@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-26 04:14:49",modified="2024-03-29 07:11:37",revision=337]]
+--[[pod_format="raw",created="2024-03-26 04:14:49",modified="2024-03-29 21:50:00",revision=471]]
 -- returns the key of a searched value inside a table
 -- such that tab[has(tab, val)] == val
 function has(tab, val)
@@ -186,7 +186,7 @@ function folder_traversal(start_dir)
 			return current_dir
 		end
 		
-		while #current_dir >= #start_dir do
+		while #current_dir >= #start_dir do			
 			local list = ls(current_dir)
 			if list then
 				for i, f in next, list, has(list, prev_folder) do

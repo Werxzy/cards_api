@@ -1,11 +1,11 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-03-29 07:11:37",revision=12573]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-03-30 00:08:46",revision=12701]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
 include"cards_api/card.lua"
 include"cards_api/button.lua"
 
---suite_save_folder = "/appdata/solitaire_collection"
+--suite_save_folder = "/appdata/solitaire_suite"
 
 mouse_last = 0
 mouse_last_click = time() - 100
@@ -207,7 +207,7 @@ function cards_api_game_started()
 end
 
 -- clears any objects being stored
-function cards_api_clear()
+function cards_api_clear(keep_func)
 	-- removes recursive connection between cards to safely remove them from memory
 	-- at least I believe this is needed
 	for c in all(cards_all) do
@@ -218,11 +218,14 @@ function cards_api_clear()
 	buttons_all = {}
 	
 	cards_coroutine = nil
-	
-	game_win_condition = nil
-	game_update = nil
-	game_draw = nil
 	cards_frozen = false
+	
+	if not keep_func then
+		game_update = nil
+		game_draw = nil
+		game_action_resolved = nil
+		game_win_condition = nil
+	end
 end
 
 function cards_api_shadows_enable(enable)

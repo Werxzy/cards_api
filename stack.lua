@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-03-30 00:08:46",revision=11834]]
+--[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-03-31 22:50:30",revision=11978]]
 
 stacks_all = {}
 stack_border = 3
@@ -163,4 +163,57 @@ function stack_add_card(stack, card, old_stack)
 			add(stack.cards, card).stack = stack
 		end
 	end
+end
+
+
+function stack_collecting_anim(stack_to, ...)
+	local function collect(s)
+		while #s.cards > 0 do
+			local c = get_top_card(s)
+			stack_add_card(stack_to, c)
+			c.a_to = 0.5
+			pause_frames(3)
+		end
+	end
+	
+	for a in all{...} do
+		if type(a) == "table" then
+			if a.cards then -- single stack	
+				collect(a)
+				
+			else -- table of stacks	
+				foreach(a, collect)	
+			end
+		end
+	end
+	
+	pause_frames(35)
+
+	stack_shuffle_anim(stack_to)
+	stack_shuffle_anim(stack_to)
+	stack_shuffle_anim(stack_to)
+end
+
+-- animation for physically shuffle the cards
+function stack_shuffle_anim(stack)
+	local temp_stack = stack_new(
+		nil, stack.x_to + card_width + 4, stack.y_to, 
+		stack_repose_static(-0.16), 
+		false, stack_cant, stack_cant)
+		
+	for i = 1, rnd(10)-5 + #stack.cards/2 do
+		stack_add_card(temp_stack, get_top_card(stack))
+	end
+	
+	pause_frames(30)
+	
+	for c in all(temp_stack.cards) do
+		stack_add_card(stack, c, rnd(#stack.cards+1)\1+1)
+	end
+	for c in all(stack.cards) do
+		card_to_top(c)
+	end
+	del(stacks_all, temp_stack)
+	
+	pause_frames(20)
 end

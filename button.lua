@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-18 02:31:29",modified="2024-03-28 23:36:41",revision=6623]]
+--[[pod_format="raw",created="2024-03-18 02:31:29",modified="2024-03-31 22:11:44",revision=6642]]
 
 -- this could use more work
 -- the purpose is to allow for animated sprite buttons
@@ -13,7 +13,7 @@ function button_new(x, y, w, h, draw, on_click)
 		on_click = on_click,
 		highlight = false,
 		enabled = true,
-		always_active = true
+		always_active = false
 	})
 end
 

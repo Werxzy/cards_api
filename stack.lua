@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-03-31 22:50:30",revision=11978]]
+--[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-03-31 23:31:00",revision=12066]]
 
 stacks_all = {}
 stack_border = 3
@@ -210,10 +210,44 @@ function stack_shuffle_anim(stack)
 	for c in all(temp_stack.cards) do
 		stack_add_card(stack, c, rnd(#stack.cards+1)\1+1)
 	end
+	
+	del(stacks_all, temp_stack)
+	
+	-- secretly randomize cards a bit
+	local c = #stack.cards
+	if c > 1 then -- must have more than 1 card to swap
+		for i = 1,rnd(2)+9 do
+			local i, j = 1, 1
+			while i == j do -- guarantee cards are different
+				 i, j = rnd(c)\1 + 1, rnd(c)\1 + 1
+			end
+			stack_quick_swap(stack,i,j) 
+		end
+	end
+	
+	stack_update_card_order(stack)
+	
+	pause_frames(20)
+end
+
+-- swaps two cards instantly with no animation
+-- will need to call stack_update_card_order to fix the draw order
+function stack_quick_swap(stack, i, j)
+	local c1, c2 = stack.cards[i], stack.cards[j]
+	if(not c1 or not c2) return -- not the same
+	
+	-- swap position in stack
+	stack.cards[i], stack.cards[j] = c2, c1
+	
+	-- swap positional properties
+	for k in all{"x","x_to","y","y_to","a","a_to","shadow"} do
+		c1[k], c2[k] = c2[k], c1[k]
+	end
+end
+
+-- if the draw order of cards in a stack need to be updated
+function stack_update_card_order(stack)
 	for c in all(stack.cards) do
 		card_to_top(c)
 	end
-	del(stacks_all, temp_stack)
-	
-	pause_frames(20)
 end

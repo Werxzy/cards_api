@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-03-31 22:50:30",revision=12816]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-04-01 00:45:54",revision=12966]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
@@ -151,16 +151,33 @@ function cards_api_mouse_update(interact)
 		end
 		
 		if mouse_up&1 == 1 and held_stack then
+			local dist_to_stack, stack_to = 9999
+			
+			--find closest stack that s:can_stack returns true
 			for s in all(stacks_all) do
 				local y = stack_y_pos(s)
 				if s ~= held_stack and s:can_stack(held_stack) 
-				and point_box(held_stack.x_to + card_width/2, 
-				held_stack.y_to + card_height/2, s.x_to, y, card_width, card_height) then
+				and point_box(
+				held_stack.x_to + card_width/2, 
+				held_stack.y_to + card_height/2, 
+				s.x_to - card_width * 0.25, y - card_height * 0.125, 
+				card_width * 1.5, card_height * 1.25) then
 					
-					s:resolve_stack(held_stack)
-					held_stack = nil
-					break
+					-- TODO: update this range based on the stack and card size
+					-- (mostly when they can be controlled individually)	
+			
+					local d = abs(held_stack.x_to - s.x_to)
+						+ abs(held_stack.y_to - y)
+						
+					if d < dist_to_stack then
+						dist_to_stack, stack_to = d, s
+					end
 				end
+			end
+			
+			if stack_to then -- closest valid stack found, drop stack on top
+				stack_to:resolve_stack(held_stack)
+				held_stack = nil
 			end
 			
 			if held_stack ~= nil then

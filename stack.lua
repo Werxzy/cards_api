@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-03-31 23:31:00",revision=12066]]
+--[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-03-31 23:40:02",revision=12076]]
 
 stacks_all = {}
 stack_border = 3
@@ -165,7 +165,7 @@ function stack_add_card(stack, card, old_stack)
 	end
 end
 
-
+-- move all cards from "..." (stacks or table of stacks) to "stack_to" 
 function stack_collecting_anim(stack_to, ...)
 	local function collect(s)
 		while #s.cards > 0 do

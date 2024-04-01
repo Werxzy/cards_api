@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-03-30 00:08:46",revision=11834]]
+--[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-03-31 23:40:02",revision=12076]]
 
 stacks_all = {}
 stack_border = 3
@@ -162,5 +162,92 @@ function stack_add_card(stack, card, old_stack)
 		else
 			add(stack.cards, card).stack = stack
 		end
+	end
+end
+
+-- move all cards from "..." (stacks or table of stacks) to "stack_to" 
+function stack_collecting_anim(stack_to, ...)
+	local function collect(s)
+		while #s.cards > 0 do
+			local c = get_top_card(s)
+			stack_add_card(stack_to, c)
+			c.a_to = 0.5
+			pause_frames(3)
+		end
+	end
+	
+	for a in all{...} do
+		if type(a) == "table" then
+			if a.cards then -- single stack	
+				collect(a)
+				
+			else -- table of stacks	
+				foreach(a, collect)	
+			end
+		end
+	end
+	
+	pause_frames(35)
+
+	stack_shuffle_anim(stack_to)
+	stack_shuffle_anim(stack_to)
+	stack_shuffle_anim(stack_to)
+end
+
+-- animation for physically shuffle the cards
+function stack_shuffle_anim(stack)
+	local temp_stack = stack_new(
+		nil, stack.x_to + card_width + 4, stack.y_to, 
+		stack_repose_static(-0.16), 
+		false, stack_cant, stack_cant)
+		
+	for i = 1, rnd(10)-5 + #stack.cards/2 do
+		stack_add_card(temp_stack, get_top_card(stack))
+	end
+	
+	pause_frames(30)
+	
+	for c in all(temp_stack.cards) do
+		stack_add_card(stack, c, rnd(#stack.cards+1)\1+1)
+	end
+	
+	del(stacks_all, temp_stack)
+	
+	-- secretly randomize cards a bit
+	local c = #stack.cards
+	if c > 1 then -- must have more than 1 card to swap
+		for i = 1,rnd(2)+9 do
+			local i, j = 1, 1
+			while i == j do -- guarantee cards are different
+				 i, j = rnd(c)\1 + 1, rnd(c)\1 + 1
+			end
+			stack_quick_swap(stack,i,j) 
+		end
+	end
+	
+	stack_update_card_order(stack)
+	
+	pause_frames(20)
+end
+
+-- swaps two cards instantly with no animation
+-- will need to call stack_update_card_order to fix the draw order
+function stack_quick_swap(stack, i, j)
+	local c1, c2 = stack.cards[i], stack.cards[j]
+	if(not c1 or not c2) return -- not the same
+	
+	-- swap position in stack
+	stack.cards[i], stack.cards[j] = c2, c1
+	
+	-- swap positional properties
+	for k in all{"x","x_to","y","y_to","a","a_to","shadow"} do
+		c1[k], c2[k] = c2[k], c1[k]
+	end
+end
+
+-- if the draw order of cards in a stack need to be updated
+function stack_update_card_order(stack)
+	for c in all(stack.cards) do
+		card_to_top(c)
 	end
 end

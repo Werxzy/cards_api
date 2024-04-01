@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-03-30 00:08:46",revision=12208]]
+--[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-03-31 23:40:02",revision=12403]]
 
 card_width = 45
 card_height = 60
@@ -18,6 +18,8 @@ function card_new(sprite, x, y, a)
 -- sometimes after a lot of testing, picotron runs out of memory
 -- stacks/cards might not be garbage collected due to referencing eachother
 -- I think this only occurs if exiting in the middle of a game
+
+--	!!! if x, y, a or their to values are changed, need to update stack_quick_swap
 	return add(cards_all, {
 		x = smooth_val(x, 0.7, 0.1), 
 		y = smooth_val(y, 0.7, 0.1), 
@@ -28,6 +30,7 @@ function card_new(sprite, x, y, a)
 		sprite = sprite,
 		shadow = 0
 		})
+	
 end
 
 -- drawing function for cards

@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-01 00:48:03",revision=13062]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-01 02:02:33",revision=13271]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
@@ -10,6 +10,8 @@ include"cards_api/button.lua"
 mouse_last = 0
 mouse_last_click = time() - 100
 mouse_last_clicked = nil
+
+hover_last = nil
 
 cards_coroutine = nil
 
@@ -100,6 +102,87 @@ function cards_api_mouse_update(interact)
 	end
 		
 	if interact then
+	-- [[
+		local hover_new = nil
+		
+		if not cards_frozen then 
+			if held_stack then
+				-- find closest card
+				local dist = 99999
+				for i = #cards_all, 1, -1 do
+					local c = cards_all[i]
+					local x, y = c.x(), c.y()
+					if c.stack != held_stack 
+					and card_overlaps_card(c, held_stack.cards[1]) then
+					
+						-- TODO take card_width and height into consideration
+						local d = abs(x - held_stack.x_to) + abs(y - held_stack.y_to)
+							
+						if d < dist then
+							dist, hover_new = d, c
+						end
+						
+					end
+				end
+				
+				-- if no closest card, find closest overlapping stack
+				if not hover_new then
+					for s in all(stacks_all) do
+						if s != held_stack then
+							local d = held_overlaps_stack(held_stack, s)
+							if d and d < dist then
+								dist, hover_new = d, s					
+							end
+						end
+					end
+				end
+
+
+			else -- find what card the cursor is over
+				for i = #cards_all, 1, -1 do
+					local c = cards_all[i]
+					if point_box(mx, my, c.x(), c.y(), card_width, card_height) then
+						hover_new = c
+						break
+					end
+				end
+				
+				if not hover_new then
+					-- check stacks instead
+					for s in all(stacks_all) do
+						if point_box(mx, my, s.x_to, s.y_to, card_width, card_height) then
+							hover_new = s
+							break
+						end
+					end
+				end
+			end	
+		end
+		
+		if hover_last != hover_new then
+			notify(tostr(hover_new) .. " " .. (hover_new and hover_new.ty or " "))
+			hover_last = hover_new
+			
+			if hover_new then
+				local st, c = nil	
+			
+				if hover_new.ty == "card" then -- card is specifically being hovered over
+					st, c = hover_new.stack, hover_new
+				
+				elseif hover_new.ty == "stack" then -- stack is hovered over
+					st = hover_new
+				end
+				
+				if st and st.hover then -- stack is hovered and has a response
+					st:hover(c, held_stack)  -- stack, card, held stack
+				end
+			end
+		end
+	--	]]
+	
+		-- TODO: use hover checks for what object should be interacted with
+		
+		-- on mouse press and no held stack
 		if mouse_down&1 == 1 and not held_stack then
 			
 			if not cards_frozen then
@@ -150,26 +233,19 @@ function cards_api_mouse_update(interact)
 			end
 		end
 		
+		-- mouse release and holding stack
 		if mouse_up&1 == 1 and held_stack then
 			local dist_to_stack, stack_to = 9999
 			
 			--find closest stack that s:can_stack returns true
 			for s in all(stacks_all) do
-				local y = stack_y_pos(s)
-				if s ~= held_stack and s:can_stack(held_stack) 
-				and point_box(
-				held_stack.x_to + card_width/2, 
-				held_stack.y_to + card_height/2, 
-				s.x_to - card_width * 0.25, y - card_height * 0.125, 
-				card_width * 1.5, card_height * 1.25) then
+				if s ~= held_stack 
+				and s:can_stack(held_stack) then
 					
-					-- TODO: update this range based on the stack and card size
-					-- (mostly when they can be controlled individually)	
-			
-					local d = abs(held_stack.x_to - s.x_to)
-						+ abs(held_stack.y_to - y)
+					
+					local d = held_overlaps_stack(held_stack, s)
 						
-					if d < dist_to_stack then
+					if d and d < dist_to_stack then
 						dist_to_stack, stack_to = d, s
 					end
 				end
@@ -205,10 +281,12 @@ function cards_api_mouse_update(interact)
 			held_stack.y_to = my - card_height/2
 		end
 		
-	else		
+	else -- not interact	
 		if mouse_down&1 == 1 and not held_stack then
 			buttons_click()
 		end
+		
+		highlighted_last = nil
 	end
 
 	if mouse_down&1 == 1 then
@@ -286,4 +364,35 @@ function cards_api_shadows_enable(enable)
 		end
 	end
 	
+end
+
+-- returns a distance to the stack if they overlap
+function held_overlaps_stack(h, s)
+	local y = stack_y_pos(s)
+	
+	if point_box(
+		h.x_to + card_width/2, 
+		h.y_to + card_height/2, 
+		s.x_to - card_width * 0.25, 
+		y - card_height * 0.125, 
+		card_width * 1.5, card_height * 1.25) then
+		
+	-- TODO: update this range based on the stack and card size
+	-- (mostly when they can be controlled individually)	
+		return abs(h.x_to - s.x_to) + abs(h.y_to - y)
+	end
+end
+
+function card_overlaps_card(a, b)
+	if point_box(
+		a.x_to + card_width/2, 
+		a.y_to + card_height/2, 
+		b.x_to - card_width * 0.25, 
+		b.y_to - card_height * 0.125, 
+		card_width * 1.5, card_height * 1.25) then
+		
+	-- TODO: update this range based on the stack and card size
+	-- (mostly when they can be controlled individually)	
+		return abs(a.x_to - b.x_to) + abs(a.y_to - b.y_to)
+	end
 end

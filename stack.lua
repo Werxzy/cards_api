@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-01 00:48:03",revision=12537]]
+--[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-01 02:02:33",revision=12724]]
 
 stacks_all = {}
 stack_border = 3
@@ -20,6 +20,7 @@ resolve_stack = called when can_stack returns true
 function stack_new(sprites, x, y, param)
 
 	local s = {
+		ty = "stack",
 		sprites = type(sprites) == "table" and sprites or {sprites},
 		x_to = x,
 		y_to = y,
@@ -30,7 +31,8 @@ function stack_new(sprites, x, y, param)
 		on_click = stack_cant,
 		on_double = on_double,
 		resolve_stack = stack_cards,
-		unresolved_stack = stack_unresolved_return
+		unresolved_stack = stack_unresolved_return,
+		-- on_hover = ... function(self, card, held_stack)
 		
 	}	
 	

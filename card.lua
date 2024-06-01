@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-03-31 23:40:02",revision=12403]]
+--[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-01 02:02:33",revision=12560]]
 
 card_width = 45
 card_height = 60
@@ -21,6 +21,7 @@ function card_new(sprite, x, y, a)
 
 --	!!! if x, y, a or their to values are changed, need to update stack_quick_swap
 	return add(cards_all, {
+		ty = "card",
 		x = smooth_val(x, 0.7, 0.1), 
 		y = smooth_val(y, 0.7, 0.1), 
 		a = smooth_angle(a, 0.7, 0.12),

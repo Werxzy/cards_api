@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-01 02:02:33",revision=12724]]
+--[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-01 22:36:47",revision=13055]]
 
 stacks_all = {}
 stack_border = 3
@@ -33,6 +33,7 @@ function stack_new(sprites, x, y, param)
 		resolve_stack = stack_cards,
 		unresolved_stack = stack_unresolved_return,
 		-- on_hover = ... function(self, card, held_stack)
+		-- off_hover = ... function(self, card, held_stack)
 		
 	}	
 	

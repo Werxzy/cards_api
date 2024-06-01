@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-26 04:14:49",modified="2024-06-01 02:02:33",revision=596]]
+--[[pod_format="raw",created="2024-03-26 04:14:49",modified="2024-06-01 22:30:40",revision=671]]
 -- returns the key of a searched value inside a table
 -- such that tab[has(tab, val)] == val
 function has(tab, val)
@@ -65,7 +65,8 @@ function smooth_val(pos, damp, acc, lim)
 			vel += dif
 			vel *= damp
 			pos += vel
-			if abs(vel) < lim and abs(dif) < lim then
+			--if abs(vel) < lim and abs(dif) < lim then
+			if vel < lim and vel > -lim and dif < lim and dif > -lim then
 				pos, vel = to, 0
 			end
 		end

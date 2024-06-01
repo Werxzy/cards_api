@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-01 02:02:33",revision=12560]]
+--[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-01 22:36:47",revision=12687]]
 
 card_width = 45
 card_height = 60
@@ -22,12 +22,19 @@ function card_new(sprite, x, y, a)
 --	!!! if x, y, a or their to values are changed, need to update stack_quick_swap
 	return add(cards_all, {
 		ty = "card",
+		
 		x = smooth_val(x, 0.7, 0.1), 
 		y = smooth_val(y, 0.7, 0.1), 
+		x_offset = smooth_val(0, 0.7, 0.1), 
+		y_offset = smooth_val(0, 0.7, 0.1), 
 		a = smooth_angle(a, 0.7, 0.12),
+		
 		x_to = x,
 		y_to = y,
+		x_offset_to = 0,
+		y_offset_to = 0,
 		a_to = a,
+		
 		sprite = sprite,
 		shadow = 0
 		})
@@ -42,7 +49,7 @@ function card_draw(c)
 	
 	if(type(sprite) == "table") sprite = sprite.sprite
 
-	local x, y, width, height = c.x(), c.y(), card_width, card_height
+	local x, y, width, height = c.x() + c.x_offset(), c.y() + c.y_offset(), card_width, card_height
 	local angle = c.x"vel" / -100 + c.a()
 	--local angle =  c.a()
 		
@@ -126,6 +133,8 @@ end
 function card_update(card)
 	card.x(card.x_to)
 	card.y(card.y_to)
+	card.x_offset(card.x_offset_to)
+	card.y_offset(card.y_offset_to)
 	card.a(card.a_to - card.x"vel"/10000)
 end
 

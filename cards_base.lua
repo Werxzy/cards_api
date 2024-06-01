@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-04-01 00:45:54",revision=12966]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-01 00:48:03",revision=13062]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
@@ -180,8 +180,21 @@ function cards_api_mouse_update(interact)
 				held_stack = nil
 			end
 			
+			-- when a held stack hasn't been placed anywhere
 			if held_stack ~= nil then
-				stack_cards(held_stack.old_stack, held_stack)
+				-- todo? allows for holding onto a stack that can't be returned
+				-- will need to check if a stack is held when clicking
+				-- which could just use the same release stack check
+				
+				-- if not func() then
+				-- 		held_stack = nil
+				-- end
+				
+				if held_stack._unresolved then
+					held_stack._unresolved()
+					held_stack._unresolved = nil
+					held_stack.old_stack = nil
+				end
 				held_stack = nil
 			end
 			cards_api_action_resolved()

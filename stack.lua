@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-01 00:20:28",revision=12426]]
+--[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-01 00:48:03",revision=12537]]
 
 stacks_all = {}
 stack_border = 3
@@ -29,7 +29,9 @@ function stack_new(sprites, x, y, param)
 		can_stack = stack_cant,
 		on_click = stack_cant,
 		on_double = on_double,
-		resolve_stack = stack_cards
+		resolve_stack = stack_cards,
+		unresolved_stack = stack_unresolved_return
+		
 	}	
 	
 	for k,v in pairs(param) do
@@ -95,9 +97,10 @@ function unstack_cards(card)
 		nil, 0, 0, 
 		{
 			reposition = stack_repose_normal(10), 
-			perm = false
+			perm = false,
+			old_stack = old_stack
 		})
-	new_stack.old_stack = old_stack
+	new_stack._unresolved = old_stack:unresolved_stack(new_stack)
 
 	local i = has(old_stack.cards, card)
 	while #old_stack.cards >= i do
@@ -269,5 +272,11 @@ end
 function stack_update_card_order(stack)
 	for c in all(stack.cards) do
 		card_to_top(c)
+	end
+end
+
+function stack_unresolved_return(old_stack, held_stack)
+	return function()
+		stack_cards(old_stack, held_stack)
 	end
 end

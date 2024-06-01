@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-03-31 23:40:02",revision=12076]]
+--[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-01 00:20:28",revision=12426]]
 
 stacks_all = {}
 stack_border = 3
@@ -9,27 +9,34 @@ Each stack has a set of rules for how cards interact with it.
 
 sprites = table of sprite ids or userdata to be drawn with sspr
 x,y = top left position of stack
-repos = function called when changing the target position of the cards
+reposition = function called when changing the target position of the cards
 perm = if the stack is removed when there is no more cards
-stack_rule = function called when another stack of cards is placed on top (with restrictions)
+can_stack = function called when another stack of cards is placed on top (with restrictions)
 on_click = function called when stack base or card in stack is clicked
 on_double = function caled when stack base or card in stack is double clicked
 resolve_stack = called when can_stack returns true
 ]]
 
-function stack_new(sprites, x, y, repos, perm, stack_rule, on_click, on_double)
-	return add(stacks_all, {
+function stack_new(sprites, x, y, param)
+
+	local s = {
 		sprites = type(sprites) == "table" and sprites or {sprites},
 		x_to = x,
 		y_to = y,
 		cards = {},
-		perm = perm,
-		reposition = repos or stack_repose_normal(),
-		can_stack = stack_rule or stack_cant,
-		on_click = on_click or stack_cant,
+		perm = true,
+		reposition = stack_repose_normal(),
+		can_stack = stack_cant,
+		on_click = stack_cant,
 		on_double = on_double,
 		resolve_stack = stack_cards
-		})
+	}	
+	
+	for k,v in pairs(param) do
+		s[k] = v
+	end
+
+	return add(stacks_all, s)
 end
 
 -- drawing function for stacks
@@ -73,6 +80,9 @@ function stack_on_click_unstack(...)
 end
 
 function unstack_rule_face_up(card)
+	if card.a_to ~= 0 then
+		notify"NO"
+	end
 	return card.a_to == 0
 end
 
@@ -81,7 +91,12 @@ end
 function unstack_cards(card)
 	local old_stack = card.stack
 	
-	local new_stack = stack_new(nil, 0, 0, stack_repose_normal(10), false, stack_cant, stack_cant)
+	local new_stack = stack_new(
+		nil, 0, 0, 
+		{
+			reposition = stack_repose_normal(10), 
+			perm = false
+		})
 	new_stack.old_stack = old_stack
 
 	local i = has(old_stack.cards, card)
@@ -172,6 +187,7 @@ function stack_collecting_anim(stack_to, ...)
 			local c = get_top_card(s)
 			stack_add_card(stack_to, c)
 			c.a_to = 0.5
+			--sfx(3)
 			pause_frames(3)
 		end
 	end
@@ -198,14 +214,18 @@ end
 function stack_shuffle_anim(stack)
 	local temp_stack = stack_new(
 		nil, stack.x_to + card_width + 4, stack.y_to, 
-		stack_repose_static(-0.16), 
-		false, stack_cant, stack_cant)
+		{
+			reposition = stack_repose_static(-0.16), 
+			perm = false
+		})
 		
 	for i = 1, rnd(10)-5 + #stack.cards/2 do
 		stack_add_card(temp_stack, get_top_card(stack))
 	end
 	
+	--sfx(3)
 	pause_frames(30)
+	--sfx(3)	
 	
 	for c in all(temp_stack.cards) do
 		stack_add_card(stack, c, rnd(#stack.cards+1)\1+1)

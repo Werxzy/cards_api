@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-01 22:36:47",revision=13582]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-01 23:26:21",revision=13715]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
@@ -160,7 +160,7 @@ function cards_api_mouse_update(interact)
 		end
 		
 		if hover_last != hover_new then
-			notify(tostr(hover_new) .. " " .. (hover_new and hover_new.ty or " "))
+			--notify(tostr(hover_new) .. " " .. (hover_new and hover_new.ty or " "))
 			
 			if hover_last then
 				cards_api_hover_event(hover_last, false)

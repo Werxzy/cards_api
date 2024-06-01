@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-01 22:36:47",revision=12687]]
+--[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-01 23:26:21",revision=12808]]
 
 card_width = 45
 card_height = 60
@@ -25,8 +25,8 @@ function card_new(sprite, x, y, a)
 		
 		x = smooth_val(x, 0.7, 0.1), 
 		y = smooth_val(y, 0.7, 0.1), 
-		x_offset = smooth_val(0, 0.7, 0.1), 
-		y_offset = smooth_val(0, 0.7, 0.1), 
+		x_offset = smooth_val(0, 0.5, 0.3), 
+		y_offset = smooth_val(0, 0.5, 0.3), 
 		a = smooth_angle(a, 0.7, 0.12),
 		
 		x_to = x,

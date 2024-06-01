@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-01 22:36:47",revision=13055]]
+--[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-01 23:26:21",revision=13219]]
 
 stacks_all = {}
 stack_border = 3
@@ -68,6 +68,40 @@ function stack_cards(stack, stack2)
 	end
 end
 
+function insert_cards(stack, stack2, i)
+	
+	-- determines where the cards will be reordered inside cards_all
+	for c in all(stack2.cards) do
+		del(cards_all, c)
+	end
+	local c_ins = stack.cards[i] 
+	if c_ins then
+		c_ins = has(cards_all, c_ins)
+	else
+		c_ins = stack.cards[i-1]	
+		if c_ins then
+			c_ins = has(cards_all, c_ins) + 1			
+		end
+	end
+		
+	for c in all(stack2.cards) do
+		if c_ins then
+			add(cards_all, c, c_ins)
+			c_ins += 1
+		else
+			add(cards_all, c)
+		end
+		
+		add(stack.cards, del(stack2.cards, c), i)
+		i += 1
+		c.stack = stack
+	end
+	stack2.old_stack = nil
+	if not stack2.perm then
+		del(stacks_all, stack2)
+	end
+end
+
 -- on_click event that unstacks cards starting from the given card
 -- if a given rule function returns true
 function stack_on_click_unstack(...)
@@ -85,9 +119,6 @@ function stack_on_click_unstack(...)
 end
 
 function unstack_rule_face_up(card)
-	if card.a_to ~= 0 then
-		notify"NO"
-	end
 	return card.a_to == 0
 end
 
@@ -281,5 +312,25 @@ end
 function stack_unresolved_return(old_stack, held_stack)
 	return function()
 		stack_cards(old_stack, held_stack)
+	end
+end
+
+function stack_unresolved_return_insert(old_stack, held_stack, old_pos)
+	return function()
+		insert_cards(old_stack, held_stack, old_pos)
+	end
+end
+
+function stack_unresolved_return_rel_x(old_stack, held_stack)
+	return function()
+		local ins, cards, x2 = #old_stack.cards + 1, old_stack.cards, held_stack.x_to
+		for i = 1, ins-1 do
+			if x2 < cards[i].x_to then
+				ins = i
+				break
+			end
+		end
+		
+		insert_cards(old_stack, held_stack, ins)
 	end
 end

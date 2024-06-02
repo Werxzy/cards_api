@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-02 01:32:29",revision=14085]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-02 02:32:20",revision=14218]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
@@ -102,7 +102,8 @@ function cards_api_mouse_update(interact)
 	end
 		
 	if interact then
-	-- [[
+	
+		-- check what is being hovered over this frame
 		local hover_new = nil
 		
 		if not cards_frozen then 
@@ -110,18 +111,14 @@ function cards_api_mouse_update(interact)
 				-- find closest card
 				local dist = 99999
 				for i = #cards_all, 1, -1 do
+				
 					local c = cards_all[i]
-					local x, y = c.x(), c.y()
-					if c.stack != held_stack 
-					and card_overlaps_card(c, held_stack.cards[1]) then
+					if c.stack != held_stack then
 					
-						-- TODO take card_width and height into consideration
-						local d = abs(x - held_stack.x_to) + abs(y - held_stack.y_to)
-							
-						if d < dist then
+						local d = card_overlaps_card(c, held_stack.cards[1]) 	
+						if d and d < dist then
 							dist, hover_new = d, c
 						end
-						
 					end
 				end
 				
@@ -129,6 +126,7 @@ function cards_api_mouse_update(interact)
 				if not hover_new then
 					for s in all(stacks_all) do
 						if s != held_stack then
+						
 							local d = held_overlaps_stack(held_stack, s)
 							if d and d < dist then
 								dist, hover_new = d, s					
@@ -147,8 +145,8 @@ function cards_api_mouse_update(interact)
 					end
 				end
 				
+				-- check stacks instead
 				if not hover_new then
-					-- check stacks instead
 					for s in all(stacks_all) do
 						if point_box(mx, my, s.x_to, s.y_to, card_width, card_height) then
 							hover_new = s
@@ -159,6 +157,7 @@ function cards_api_mouse_update(interact)
 			end	
 		end
 		
+		-- update on what has been hovered
 		if hover_last != hover_new then
 			notify(tostr(hover_new) .. " " .. (hover_new and hover_new.ty or " "))
 			
@@ -175,54 +174,48 @@ function cards_api_mouse_update(interact)
 		
 		hover_last = hover_new
 		
-	--	]]
 	
-		-- TODO: use hover checks for what object should be interacted with
-		
 		-- on mouse press and no held stack
 		if mouse_down&1 == 1 and not held_stack then
 			
-			if not cards_frozen then
-				for i = #cards_all, 1, -1 do
-					local c = cards_all[i]
-					if point_box(mx, my, c.x(), c.y(), card_width, card_height) then
-						
-						if double_click 
-						and mouse_last_clicked == c
-						and c.stack.on_double then
-							c.stack.on_double(c)
-							mouse_last_clicked = nil
-						else
-							c.stack.on_click(c)
-							mouse_last_clicked = c
-						end
-						clicked = true
-						break
-					end
+			if not cards_frozen 
+			and hover_last 
+			and hover_last.ty == "card" then	
+				
+				if double_click 
+				and mouse_last_clicked == hover_last
+				and hover_last.stack.on_double then
+					hover_last.stack.on_double(hover_last)
+					mouse_last_clicked = nil
+					
+				else
+					hover_last.stack.on_click(hover_last)
+					mouse_last_clicked = hover_last
 				end
+				
+				clicked = true
 			end
 			
 			if not clicked then
 				buttons_click() 
 			end
 			
-			if not clicked and not cards_frozen then
-				for s in all(stacks_all) do
-					if point_box(mx, my, s.x_to, s.y_to, card_width, card_height) then
+			if not clicked 
+			and not cards_frozen 
+			and hover_last
+			and hover_last.ty == "stack" then
+			
+				if time() - mouse_last_click < 0.5 
+				and mouse_last_clicked == hover_last 
+				and hover_last.on_double then
+					hover_last.on_double()
+					mouse_last_clicked = nil
 					
-						if time() - mouse_last_click < 0.5 
-						and mouse_last_clicked == s 
-						and s.on_double then
-							s.on_double()
-							mouse_last_clicked = nil
-						else
-							s.on_click()
-							mouse_last_clicked = s
-						end
-						clicked = true
-						break
-					end
+				else
+					hover_last.on_click()
+					mouse_last_clicked = hover_last
 				end
+				clicked = true
 			end
 			
 			if clicked then
@@ -233,15 +226,13 @@ function cards_api_mouse_update(interact)
 		-- mouse release and holding stack
 		if mouse_up&1 == 1 and held_stack then
 			local dist_to_stack, stack_to = 9999
+			--TODO? instead use hover_last, though it can contain cards, though this can be fine?
 			
 			--find closest stack that s:can_stack returns true
 			for s in all(stacks_all) do
 				if s ~= held_stack 
 				and s:can_stack(held_stack) then
-					
-					
 					local d = held_overlaps_stack(held_stack, s)
-						
 					if d and d < dist_to_stack then
 						dist_to_stack, stack_to = d, s
 					end

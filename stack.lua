@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-02 01:32:29",revision=13618]]
+--[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-02 02:32:20",revision=13760]]
 
 stacks_all = {}
 stack_border = 3
@@ -87,9 +87,7 @@ function insert_cards(stack, stack2, i)
 	end
 	
 	stack2.old_stack = nil
-	if not stack2.perm then
-		del(stacks_all, stack2)
-	end
+	stack_delete_check(stack2)
 end
 
 -- on_click event that unstacks cards starting from the given card
@@ -116,14 +114,7 @@ end
 -- cards starting from the given card to the top of the stack (stack[#stack])
 function unstack_cards(card)
 	local old_stack = card.stack
-	
-	local new_stack = stack_new(
-		nil, 0, 0, 
-		{
-			reposition = stack_repose_normal(10), 
-			perm = false,
-			old_stack = old_stack
-		})
+	local new_stack = stack_held_new(old_stack)
 	new_stack._unresolved = old_stack:unresolved_stack(new_stack)
 
 	local i = has(old_stack.cards, card)
@@ -133,11 +124,21 @@ function unstack_cards(card)
 		c.stack = new_stack
 	end
 	
-	if #old_stack.cards == 0 and not old_stack.perm then
-		del(stacks_all, old_stack)
-	end	
+	stack_delete_check(old_stack)
 	
 	return new_stack
+end
+
+function stack_held_new(old_stack)
+	local st = stack_new(
+		nil, 0, 0, 
+		{
+			reposition = stack_repose_normal(10), 
+			perm = false,
+			old_stack = old_stack
+		})
+
+	return st
 end
 
 -- reposition calculation for a stack that allows for more floaty cards
@@ -185,6 +186,13 @@ end
 -- more just for nice naming
 -- could still be used for other events like sound effects
 function stack_cant()
+end
+
+-- deletes a stack if it has no cards and if it is not permanent
+function stack_delete_check(stack)
+	if #stack.cards == 0 and not stack.perm then
+		del(stacks_all, stack)
+	end	
 end
 
 -- adds a card to the top of a stack

@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-01 23:26:21",revision=13715]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-02 00:30:58",revision=13958]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
@@ -160,17 +160,21 @@ function cards_api_mouse_update(interact)
 		end
 		
 		if hover_last != hover_new then
-			--notify(tostr(hover_new) .. " " .. (hover_new and hover_new.ty or " "))
+			notify(tostr(hover_new) .. " " .. (hover_new and hover_new.ty or " "))
 			
 			if hover_last then
 				cards_api_hover_event(hover_last, false)
 			end
 			if hover_new then
-				cards_api_hover_event(hover_new, true)
+				cards_api_hover_event(hover_new, true, true)
 			end
 			
-			hover_last = hover_new
+		elseif hover_last then
+			cards_api_hover_event(hover_last, true)
 		end
+		
+		hover_last = hover_new
+		
 	--	]]
 	
 		-- TODO: use hover checks for what object should be interacted with
@@ -391,8 +395,9 @@ function card_overlaps_card(a, b)
 end
 
 -- st = stack or card being hovered
--- hovering = true if the st is being hovered that frame, or false if no longer that frame
-function cards_api_hover_event(st, hovering)
+-- hovering = true if it's being hovered over
+-- first_frame = true if it's the first frame being hovered
+function cards_api_hover_event(st, hovering, first_frame)
 	local c = nil	
 
 	if st.ty == "card" then -- card is specifically being hovered over

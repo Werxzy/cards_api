@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-01 23:26:21",revision=13219]]
+--[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-02 00:30:58",revision=13471]]
 
 stacks_all = {}
 stack_border = 3
@@ -323,14 +323,19 @@ end
 
 function stack_unresolved_return_rel_x(old_stack, held_stack)
 	return function()
-		local ins, cards, x2 = #old_stack.cards + 1, old_stack.cards, held_stack.x_to
-		for i = 1, ins-1 do
-			if x2 < cards[i].x_to then
-				ins = i
-				break
-			end
-		end
-		
+		local ins = hand_find_insert_x(old_stack, held_stack)
 		insert_cards(old_stack, held_stack, ins)
 	end
+end
+
+-- find the i-th location to insert the held stack into the ins_stack
+function hand_find_insert_x(ins_stack, held_stack)
+	local cards, x2 = ins_stack.cards, held_stack.x_to
+	for i = 1, #ins_stack.cards do
+		if x2 < cards[i].x_to then
+			return i
+		end
+	end
+	
+	return #ins_stack.cards + 1
 end

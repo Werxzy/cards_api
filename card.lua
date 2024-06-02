@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-01 23:26:21",revision=12808]]
+--[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-02 00:30:58",revision=13063]]
 
 card_width = 45
 card_height = 60
@@ -50,8 +50,8 @@ function card_draw(c)
 	if(type(sprite) == "table") sprite = sprite.sprite
 
 	local x, y, width, height = c.x() + c.x_offset(), c.y() + c.y_offset(), card_width, card_height
-	local angle = c.x"vel" / -100 + c.a()
-	--local angle =  c.a()
+	local angle = (c.x"vel" + c.x_offset"vel") / -100 + c.a()
+	--local angle = c.a()
 		
 	local dx, dy = cos(angle), -sin(angle)*0.5
 	if dx < 0 then
@@ -64,13 +64,13 @@ function card_draw(c)
 		card_shadow_draw(c, x, y, width, height, dx, dy)
 	end
 
-	y -= dy * width / 2
-	
 	if abs(dy*card_width) < 1 then
 		sspr(sprite, 0, 0, width, height, x, y)
 	else
 		local x = x - dx*width/2 + width/2
 		local sx = 0
+		y -= dy * width / 2
+		y += 0.5
 		
 		local last_drawn = -999
 		for x2 = 0,width - 1 do

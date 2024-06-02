@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-02 00:30:58",revision=13063]]
+--[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-02 01:32:29",revision=13164]]
 
 card_width = 45
 card_height = 60
@@ -141,6 +141,38 @@ end
 -- puts the given card above all other cards in drawing order
 function card_to_top(card)
 	add(cards_all, del(cards_all, card))
+end
+
+function cards_into_stack_order(into_stack, held, i)
+	local c_ins = into_stack.cards[i] 
+	if c_ins then
+		cards_to_insert(held, c_ins)
+	else
+		c_ins = into_stack.cards[i - 1] 
+		if c_ins then
+			cards_to_insert(held, c_ins, true)
+		else
+			stack_to_top(held)
+		end
+	end
+end
+
+-- puts the given stack of cards on top or below given card in drawing order
+function cards_to_insert(stack, card, on_top)
+	-- removes all cards first, to get correct insert position
+	for c in all(stack.cards) do
+		del(cards_all, c)
+	end
+	
+	-- find position
+	local c_ins = has(cards_all, card)
+	if (on_top) c_ins += 1	
+		
+	-- reinsert cards
+	for c in all(stack.cards) do
+		add(cards_all, c, c_ins)
+		c_ins += 1
+	end
 end
 
 -- checks if the given card is on top of its stack

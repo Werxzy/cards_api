@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-02 00:30:58",revision=13471]]
+--[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-02 01:32:29",revision=13618]]
 
 stacks_all = {}
 stack_border = 3
@@ -68,34 +68,24 @@ function stack_cards(stack, stack2)
 	end
 end
 
+function stack_to_top(stack)
+	foreach(stack.cards, card_to_top)
+	--for c in all(stack2.cards) do
+	--	card_to_top(c)
+	--end
+end
+
 function insert_cards(stack, stack2, i)
 	
 	-- determines where the cards will be reordered inside cards_all
-	for c in all(stack2.cards) do
-		del(cards_all, c)
-	end
-	local c_ins = stack.cards[i] 
-	if c_ins then
-		c_ins = has(cards_all, c_ins)
-	else
-		c_ins = stack.cards[i-1]	
-		if c_ins then
-			c_ins = has(cards_all, c_ins) + 1			
-		end
-	end
+	cards_into_stack_order(stack, stack2, i)
 		
-	for c in all(stack2.cards) do
-		if c_ins then
-			add(cards_all, c, c_ins)
-			c_ins += 1
-		else
-			add(cards_all, c)
-		end
-		
+	for c in all(stack2.cards) do		
 		add(stack.cards, del(stack2.cards, c), i)
 		i += 1
 		c.stack = stack
 	end
+	
 	stack2.old_stack = nil
 	if not stack2.perm then
 		del(stacks_all, stack2)

@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-02 02:32:20",revision=14218]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-03 23:26:14",revision=14410]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
@@ -159,7 +159,7 @@ function cards_api_mouse_update(interact)
 		
 		-- update on what has been hovered
 		if hover_last != hover_new then
-			notify(tostr(hover_new) .. " " .. (hover_new and hover_new.ty or " "))
+			--notify(tostr(hover_new) .. " " .. (hover_new and hover_new.ty or " "))
 			
 			if hover_last then
 				cards_api_hover_event(hover_last, false)
@@ -265,8 +265,10 @@ function cards_api_mouse_update(interact)
 		end
 		
 		if held_stack then
-			held_stack.x_to = mx - card_width/2
-			held_stack.y_to = my - card_height/2
+			--held_stack.x_to = mx - card_width/2
+			--held_stack.y_to = my - card_height/2
+			held_stack.x_to += mx - mlx
+			held_stack.y_to += my - mly
 		end
 		
 	else -- not interact	
@@ -281,7 +283,9 @@ function cards_api_mouse_update(interact)
 		mouse_last_click = time(s)
 	end
 	mouse_last = md
+	mlx, mly = mx, my
 end
+mlx, mly = 0, 0
 
 -- when an action is resolved, call the game's reaction function and check win condition
 function cards_api_action_resolved()

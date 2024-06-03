@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-02 02:32:20",revision=13760]]
+--[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-03 23:26:14",revision=13978]]
 
 stacks_all = {}
 stack_border = 3
@@ -114,7 +114,7 @@ end
 -- cards starting from the given card to the top of the stack (stack[#stack])
 function unstack_cards(card)
 	local old_stack = card.stack
-	local new_stack = stack_held_new(old_stack)
+	local new_stack = stack_held_new(old_stack, card)
 	new_stack._unresolved = old_stack:unresolved_stack(new_stack)
 
 	local i = has(old_stack.cards, card)
@@ -129,9 +129,12 @@ function unstack_cards(card)
 	return new_stack
 end
 
-function stack_held_new(old_stack)
+function stack_held_new(old_stack, card)
 	local st = stack_new(
-		nil, 0, 0, 
+		nil,
+		card.x_to, card.y_to,
+--		old_stack.x_to, old_stack.y_to, 
+--		0, 0, 
 		{
 			reposition = stack_repose_normal(10), 
 			perm = false,
@@ -313,6 +316,9 @@ function stack_unresolved_return(old_stack, held_stack)
 	end
 end
 
+
+-- hand specific event functions
+
 function stack_unresolved_return_insert(old_stack, held_stack, old_pos)
 	return function()
 		insert_cards(old_stack, held_stack, old_pos)
@@ -323,6 +329,7 @@ function stack_unresolved_return_rel_x(old_stack, held_stack)
 	return function()
 		local ins = hand_find_insert_x(old_stack, held_stack)
 		insert_cards(old_stack, held_stack, ins)
+		old_stack.ins_offset = nil
 	end
 end
 
@@ -336,4 +343,93 @@ function hand_find_insert_x(ins_stack, held_stack)
 	end
 	
 	return #ins_stack.cards + 1
+
+--[[ another idea, but not needed
+	local cards, x2 = ins_stack.cards, held_stack.x_to
+	local min_dif, closest = 9999
+	for i = 1, #ins_stack.cards do
+		local d = abs(cards[i].x_to - x2)
+		if d < min_dif then
+			min_dif, closest = d, i
+		end
+	end
+	-- missing check for being after the last card
+	return closest
+--]]
+end
+
+
+function stack_repose_hand(x_delta, limit)
+	x_delta = x_delta or 25
+	limit = limit or 140
+	
+	return function(stack, dx)
+		local x, xd = stack.x_to, min(x_delta, limit / (#stack.cards + (stack.ins_offset and 1 or 0)))
+		for i, c in pairs(stack.cards) do
+		--	instead
+		--	c.x_to = x
+		--	c.x_offset_to = stack.ins_offset and stack.ins_offset <= i and xd or 0
+		
+			c.x_to = x + (stack.ins_offset and stack.ins_offset <= i and xd or 0)
+		
+			c.y_to = stack.y_to
+			c.y_offset_to = c.hovered and -15 or 0
+			x += xd
+		end
+	end
+end
+
+-- designed to pick up a single card
+function unstack_hand_card(card)
+	if not card then
+		return
+	end
+	
+	-- TODO? would rather not have to do this
+	card.x_offset_to = 0
+	card.y_offset_to = 0
+	card.hovered = false
+	
+	local old_stack = card.stack
+	local new_stack = stack_held_new(old_stack, card)
+	new_stack.old_pos = has(old_stack.cards, card)
+	new_stack._unresolved = old_stack:unresolved_stack(new_stack, has(old_stack.cards, card))
+	old_stack.ins_offset = new_stack.old_pos
+	
+	-- moves card to new stack
+	add(new_stack.cards, del(old_stack.cards, card))
+	card.stack = new_stack
+	stack_delete_check(old_stack)
+	
+	held_stack = new_stack
+	--return new_stack
+end
+
+function hand_on_hover(self, card, held)
+	
+	if held then
+		-- shift cards and insert held stack into cards_all order
+		self.ins_offset = hand_find_insert_x(self, held)
+		--self.ins_offset = has(self.cards, card) -- something like this??
+		cards_into_stack_order(self, held, self.ins_offset)
+
+	else
+		self.ins_offset = nil
+		if card then
+			card.hovered = true
+		end
+	end
+	
+end
+
+function hand_off_hover(self, card, held)
+	if held then
+		-- shift cards and back and put held cards back on top
+		self.ins_offset = nil
+		stack_update_card_order(held)
+	end
+	
+	if card then
+		card.hovered = nil
+	end
 end

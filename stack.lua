@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-04 02:11:39",revision=14232]]
+--[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-04 02:32:58",revision=14331]]
 
 stacks_all = {}
 stack_border = 3
@@ -326,7 +326,7 @@ end
 function stack_hand_new(sprites, x, y, param)
 	local param_base = {
 		top_most = 100,
-		reposition = stack_repose_hand(),
+		reposition = stack_repose_hand(param.hand_max_delta, param.hand_width),
 		
 		--can_stack = function() return true end,
 		on_click = unstack_hand_card,
@@ -395,10 +395,15 @@ end
 
 function stack_repose_hand(x_delta, limit)
 	x_delta = x_delta or 25
-	limit = limit or 140
+	limit = limit or 200
 	
 	return function(stack, dx)
-		local x, xd = stack.x_to, min(x_delta, limit / (#stack.cards + (stack.ins_offset and 1 or 0)))
+	
+		local lim = (limit - card_width) / (#stack.cards + (stack.ins_offset and 1 or 0) - 1)
+		
+		--local x, xd = stack.x_to, min(x_delta, limit / (#stack.cards + (stack.ins_offset and 1 or 0)))
+		local x, xd = stack.x_to, min(x_delta, lim)
+		
 		for i, c in pairs(stack.cards) do
 		--	instead of applying an offset
 		--	c.x_to = x

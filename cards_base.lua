@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-03 23:26:14",revision=14410]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-04 02:11:39",revision=14635]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
@@ -225,6 +225,7 @@ function cards_api_mouse_update(interact)
 		
 		-- mouse release and holding stack
 		if mouse_up&1 == 1 and held_stack then
+			--[[
 			local dist_to_stack, stack_to = 9999
 			--TODO? instead use hover_last, though it can contain cards, though this can be fine?
 			
@@ -244,8 +245,24 @@ function cards_api_mouse_update(interact)
 				held_stack = nil
 			end
 			
+			]]
+			
+			if hover_last then
+				local s, c = nil
+				if hover_last.ty == "stack" then
+					s = hover_last
+				elseif hover_last.ty == "card" then
+					s, c = hover_last.stack, hover_last
+				end
+				
+				if s and s:can_stack(held_stack, c) then
+					s:resolve_stack(held_stack, c)
+					held_stack = nil
+				end
+			end
+			
 			-- when a held stack hasn't been placed anywhere
-			if held_stack ~= nil then
+			if held_stack then
 				-- todo? allows for holding onto a stack that can't be returned
 				-- will need to check if a stack is held when clicking
 				-- which could just use the same release stack check
@@ -289,6 +306,7 @@ mlx, mly = 0, 0
 
 -- when an action is resolved, call the game's reaction function and check win condition
 function cards_api_action_resolved()
+
 	if(game_action_resolved) game_action_resolved()
 	
 	-- check if win condition is met

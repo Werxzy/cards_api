@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-03 23:26:14",revision=13978]]
+--[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-04 02:11:39",revision=14232]]
 
 stacks_all = {}
 stack_border = 3
@@ -26,6 +26,7 @@ function stack_new(sprites, x, y, param)
 		y_to = y,
 		cards = {},
 		perm = true,
+		top_most = 0,
 		reposition = stack_repose_normal(),
 		can_stack = stack_cant,
 		on_click = stack_cant,
@@ -59,8 +60,8 @@ end
 function stack_cards(stack, stack2)
 	for c in all(stack2.cards) do
 		add(stack.cards, del(stack2.cards, c))
-		card_to_top(c)
 		c.stack = stack
+		card_to_top(c)
 	end
 	stack2.old_stack = nil
 	if not stack2.perm then
@@ -120,8 +121,8 @@ function unstack_cards(card)
 	local i = has(old_stack.cards, card)
 	while #old_stack.cards >= i do
 		local c = add(new_stack.cards, deli(old_stack.cards, i))
-		card_to_top(c) -- puts cards on top of all the others
 		c.stack = new_stack
+		card_to_top(c) -- puts cards on top of all the others
 	end
 	
 	stack_delete_check(old_stack)
@@ -136,6 +137,7 @@ function stack_held_new(old_stack, card)
 --		old_stack.x_to, old_stack.y_to, 
 --		0, 0, 
 		{
+			top_most = 999,
 			reposition = stack_repose_normal(10), 
 			perm = false,
 			old_stack = old_stack
@@ -202,8 +204,6 @@ end
 -- if an old stack is given, the card is removed from that table/stack instead
 function stack_add_card(stack, card, old_stack)
 	if card then
-		card_to_top(card)
-		
 		if type(old_stack) == "table" then
 			del(old_stack, card)
 		elseif card.stack then
@@ -215,6 +215,8 @@ function stack_add_card(stack, card, old_stack)
 		else
 			add(stack.cards, card).stack = stack
 		end
+		
+		card_to_top(card)
 	end
 end
 
@@ -319,6 +321,35 @@ end
 
 -- hand specific event functions
 
+-- creates a basic stack for holding cards in a hand
+-- cards can be reordered without needing to check can_stack
+function stack_hand_new(sprites, x, y, param)
+	local param_base = {
+		top_most = 100,
+		reposition = stack_repose_hand(),
+		
+		--can_stack = function() return true end,
+		on_click = unstack_hand_card,
+		resolve_stack = stack_insert_cards,
+		unresolved_stack = stack_unresolved_return_rel_x,
+		
+		on_hover = hand_on_hover,
+		off_hover = hand_off_hover,
+	}
+	
+	for k,v in pairs(param) do
+		param_base[k] = v
+	end
+	
+	return stack_new(sprites, x, y, param_base)
+end
+
+function stack_insert_cards(self, held, card)
+	local ins = hand_find_insert_x(self, held)
+	insert_cards(self, held, ins)
+	self.ins_offset = nil
+end
+
 function stack_unresolved_return_insert(old_stack, held_stack, old_pos)
 	return function()
 		insert_cards(old_stack, held_stack, old_pos)
@@ -327,9 +358,12 @@ end
 
 function stack_unresolved_return_rel_x(old_stack, held_stack)
 	return function()
+		stack_insert_cards(old_stack, held_stack)
+		--[[
 		local ins = hand_find_insert_x(old_stack, held_stack)
 		insert_cards(old_stack, held_stack, ins)
 		old_stack.ins_offset = nil
+		]]
 	end
 end
 
@@ -366,7 +400,7 @@ function stack_repose_hand(x_delta, limit)
 	return function(stack, dx)
 		local x, xd = stack.x_to, min(x_delta, limit / (#stack.cards + (stack.ins_offset and 1 or 0)))
 		for i, c in pairs(stack.cards) do
-		--	instead
+		--	instead of applying an offset
 		--	c.x_to = x
 		--	c.x_offset_to = stack.ins_offset and stack.ins_offset <= i and xd or 0
 		

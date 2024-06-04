@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-02 01:46:18",revision=13170]]
+--[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-04 02:11:39",revision=13281]]
 
 card_width = 45
 card_height = 60
@@ -139,8 +139,27 @@ function card_update(card)
 end
 
 -- puts the given card above all other cards in drawing order
+-- based on the card's stack's top_most value
+-- should normally call AFTER changing the stack
+-- 		if all stacks have the same priority, this won't matter
 function card_to_top(card)
-	add(cards_all, del(cards_all, card))
+-- old method that just pushed the card to the top
+--	add(cards_all, del(cards_all, card))
+
+	del(cards_all, card)
+	local tm = card.stack.top_most
+	
+	if #cards_all > 1 then
+		for i = #cards_all, 1, -1 do
+			local c2 = cards_all[i]
+			if not c2.stack or c2.stack.top_most <= tm then
+				add(cards_all, card, i+1)
+				return
+			end
+		end
+	end
+	
+	add(cards_all, card, 1)
 end
 
 function cards_into_stack_order(into_stack, held, i)

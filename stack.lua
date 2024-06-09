@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-04 02:32:58",revision=14331]]
+--[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-09 01:25:38",revision=14530]]
 
 stacks_all = {}
 stack_border = 3
@@ -11,10 +11,14 @@ sprites = table of sprite ids or userdata to be drawn with sspr
 x,y = top left position of stack
 reposition = function called when changing the target position of the cards
 perm = if the stack is removed when there is no more cards
+top_most = controls the draw order of cards between stacks
 can_stack = function called when another stack of cards is placed on top (with restrictions)
 on_click = function called when stack base or card in stack is clicked
 on_double = function caled when stack base or card in stack is double clicked
-resolve_stack = called when can_stack returns true
+resolve_stack = function called when can_stack returns true
+unresolved_stack = function called when a held card is released, but isn't placed onto a stack
+on_hover = function called when the cursor over the stack or card
+off_hover = function called when the cursor is no longer over the stack or card
 ]]
 
 function stack_new(sprites, x, y, param)
@@ -33,7 +37,7 @@ function stack_new(sprites, x, y, param)
 		on_double = on_double,
 		resolve_stack = stack_cards,
 		unresolved_stack = stack_unresolved_return,
-		-- on_hover = ... function(self, card, held_stack)
+		-- on_hover = ... function(self, card, held_stack, first)
 		-- off_hover = ... function(self, card, held_stack)
 		
 	}	
@@ -49,6 +53,7 @@ end
 -- always drawn below cards
 function stack_draw(s)
 	if s.perm then
+		-- TODO: remove stack_border, make it a property of stacks (x and y)
 		local x, y = s.x_to - stack_border, s.y_to - stack_border
 		for sp in all(s.sprites) do
 			spr(sp, x, y)
@@ -130,6 +135,8 @@ function unstack_cards(card)
 	return new_stack
 end
 
+-- old_stack is where the cards are coming from
+-- card is the base position of the stack
 function stack_held_new(old_stack, card)
 	local st = stack_new(
 		nil,

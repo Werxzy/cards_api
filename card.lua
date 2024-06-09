@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-04 02:32:58",revision=13358]]
+--[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-09 07:04:46",revision=13522]]
 
 card_width = 45
 card_height = 60
@@ -7,10 +7,14 @@ card_back = {sprite = 10} -- sprite can be number or userdata
 cards_all = {}
 card_shadows_on = true
 
-function card_new(sprite, x, y, a)
+-- TODO: reorder
+function card_new(sprite, x, y, a, w, h, back_sprite)
 	x = x or 0
 	y = y or 0
 	a = a or 0
+	
+	w = w or 45
+	h = h or 60
 	
 -- todo, allow for specifying card back
 
@@ -19,6 +23,8 @@ function card_new(sprite, x, y, a)
 -- stacks/cards might not be garbage collected due to referencing eachother
 -- I think this only occurs if exiting in the middle of a game
 
+	-- expects sprite to be a number or userdata
+	
 --	!!! if x, y, a or their to values are changed, need to update stack_quick_swap
 	return add(cards_all, {
 		ty = "card",
@@ -35,7 +41,11 @@ function card_new(sprite, x, y, a)
 		y_offset_to = 0,
 		a_to = a,
 		
+		width = w,
+		height = h,
+		
 		sprite = sprite,
+		back_sprite = back_sprite,
 		shadow = 0
 		})
 	

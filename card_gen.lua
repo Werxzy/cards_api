@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-23 23:52:47",modified="2024-03-25 01:46:37",revision=632]]
+--[[pod_format="raw",created="2024-03-23 23:52:47",modified="2024-06-09 07:04:46",revision=894]]
 
 local default_suits = {
 	--"Spades",
@@ -45,7 +45,7 @@ local default_suit_colors = {
 }
 
 -- x left, middle, right = {9, 19, 29}
-local default_icon_pos = {
+local default_suit_pos = {
 	{{19, 28}},
 	{{19, 17}, {19, 39}},
 	{{19, 17}, {19, 28}, {19, 39}},
@@ -65,18 +65,26 @@ local default_face_sprites = {
 	[13] = 64
 }
 
+--[[
 function card_gen_standard(suits, ranks, 
 	suit_chars, rank_chars, suit_colors, face_sprites,
 	icon_pos)
-	
+]]
+function card_gen_standard(param)
+
 	-- default values
-	suits = suits or 4
-	ranks = ranks or 13
-	suit_chars = suit_chars or default_suits
-	rank_chars = rank_chars or default_ranks
-	suit_colors = suit_colors or default_suit_colors
-	face_sprites = face_sprites or default_face_sprites
-	icon_pos = icon_pos or default_icon_pos
+	local suits = param.suits or 4
+	local ranks = param.ranks or 13
+	
+	local suit_chars = param.suit_chars or default_suits
+	local rank_chars = param.rank_chars or default_ranks
+	local suit_colors = param.suit_colors or default_suit_colors
+	local suit_pos = param.suit_pos or default_suit_pos
+	
+	local face_sprites = param.face_sprites or default_face_sprites
+	
+	local width = param.width or 45
+	local height = param.height or 60
 	
 	local card_sprites = {}
 	
@@ -90,17 +98,17 @@ function card_gen_standard(suits, ranks,
 			local rank_char = rank_chars[rank]
 			
 			-- prepare render
-			local new_sprite = userdata("u8", card_width, card_height)
+			local new_sprite = userdata("u8", width, height)
 			set_draw_target(new_sprite)
 			
 			-- draw card base
-			nine_slice(8, 0, 0, card_width, card_height)
+			nine_slice(8, 0, 0, width, height)
 			
 			-- draw rank/suit
 			print(rank_char .. suit_char, 3, 3, col[1])
 			
 			local sp = face_sprites[rank]
-			local pos = icon_pos[rank]
+			local pos = suit_pos[rank]
 			
 			-- draw sprite if it calls for it
 			if sp then 
@@ -133,5 +141,38 @@ function card_gen_standard(suits, ranks,
 	set_draw_target()
 	
 	return card_sprites
+end
+
+function card_gen_back(param)
+
+	-- expects sprite to be 100x100 pixels at least
+	-- width a default size of 45x60
+
+	param = param or {}
+
+	local sprite = param.sprite or 112
+	local border = param.border or 25
+	local width = param.width or 45
+	local height = param.height or 60
+	
+	local left = param.left or 2
+	local right = param.right or 2
+	local top = param.top or 2
+	local bottom = param.bottom or 2
+	
+	local new_sprite = userdata("u8", width, height)
+	set_draw_target(new_sprite)
+	
+	sprite = type(sprite) == "number" and get_spr(sprite) or sprite
+	local sp_w, sp_h = sprite:width(), sprite:height()
+
+	local w2 = width - left - right
+	local h2 = height - top - bottom
+
+	sspr(sprite, (sp_w - width)\2 + left,(sp_h - height)\2 + top, w2,h2, left,top)
+
+	nine_slice(border, 0, 0, width, height)
+	
+	return new_sprite
 end
 

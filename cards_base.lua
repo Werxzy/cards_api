@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-10 08:58:48",revision=15805]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-10 11:00:49",revision=16214]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
@@ -128,7 +128,7 @@ function cards_api_mouse_update(interact)
 			else -- find what card the cursor is over
 				for i = #cards_all, 1, -1 do
 					local c = cards_all[i]
-					if point_box(mx, my, c.x(), c.y(), card_width, card_height) then
+					if point_box(mx, my, c.x(), c.y(), c.width, c.height) then
 						hover_new = c
 						break
 					end
@@ -137,7 +137,9 @@ function cards_api_mouse_update(interact)
 				-- check stacks instead
 				if not hover_new then
 					for s in all(stacks_all) do
-						if point_box(mx, my, s.x_to, s.y_to, card_width, card_height) then
+						-- TODO stacks should have a set width and height
+					--	if point_box(mx, my, s.x_to, s.y_to, s.width, s.height) then
+						if point_box(mx, my, s.x_to, s.y_to, 45, 60) then
 							hover_new = s
 							break
 						end
@@ -271,8 +273,8 @@ function cards_api_mouse_update(interact)
 		end
 		
 		if held_stack then
-			--held_stack.x_to = mx - card_width/2
-			--held_stack.y_to = my - card_height/2
+			--held_stack.x_to = mx - c.width/2
+			--held_stack.y_to = my - c.height/2
 			held_stack.x_to += mx - mlx
 			held_stack.y_to += my - mly
 		end
@@ -369,29 +371,33 @@ end
 function held_overlaps_stack(h, s)
 	local y = stack_y_pos(s)
 	
+	--TODO: adjust this to make more sense
+	
+	local c = h.cards[1]	
+	local width, height = c.width, c.height
+	
 	if point_box(
-		h.x_to + card_width/2, 
-		h.y_to + card_height/2, 
-		s.x_to - card_width * 0.25, 
-		y - card_height * 0.125, 
-		card_width * 1.5, card_height * 1.25) then
+		h.x_to + width/2, 
+		h.y_to + height/2, 
+		s.x_to - width*0.25, 
+		y - height*0.125, 
+		width*1.5, height*1.25) then
 		
-	-- TODO: update this range based on the stack and card size
-	-- (mostly when they can be controlled individually)	
 		return abs(h.x_to - s.x_to) + abs(h.y_to - y)
 	end
 end
 
 function card_overlaps_card(a, b)
+
+	--TODO: adjust this to make more sense
+
 	if point_box(
-		a.x_to + card_width/2, 
-		a.y_to + card_height/2, 
-		b.x_to - card_width * 0.25, 
-		b.y_to - card_height * 0.125, 
-		card_width * 1.5, card_height * 1.25) then
+		a.x_to + a.width/2, 
+		a.y_to + a.height/2, 
+		b.x_to - b.width * 0.25, 
+		b.y_to - b.height * 0.125, 
+		b.width * 1.5, b.height * 1.25) then
 		
-	-- TODO: update this range based on the stack and card size
-	-- (mostly when they can be controlled individually)	
 		return abs(a.x_to - b.x_to) + abs(a.y_to - b.y_to)
 	end
 end

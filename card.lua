@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-10 08:58:48",revision=14172]]
+--[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-10 09:44:09",revision=14361]]
 
 card_width = 45
 card_height = 60
@@ -217,12 +217,24 @@ function get_top_card(stack)
 end
 
 -- makes a card back sprite that can be updated
-function card_back_animated(func, data)
-	
-	return function(width, height)
-		local d2 = {param = {}}
+function card_back_animated(data)
 
-		for k,v in pairs(data.param) do
+	local func = data.sprite
+	
+	data.gen = function(width, height)
+		local d2 = {}
+		
+		-- copy all values
+		for k,v in pairs(data or {}) do
+			d2[k] = v
+		end
+		
+		-- unique param
+		d2.param = {
+			width = width, 
+			height = height
+		}
+		for k,v in pairs(data.param or {}) do
 			d2.param[k] = v
 		end
 		
@@ -234,7 +246,7 @@ function card_back_animated(func, data)
 		end
 		
 		d2.update = function()			
-			card_gen_back(data.param)
+			card_gen_back(d2.param)
 		end
 		
 		d2.destroy = function()
@@ -242,7 +254,7 @@ function card_back_animated(func, data)
 		end
 						
 		if type(data.init) == "function" then
-			data.init()
+			data.init(d2)
 		end
 		
 		return add(cards_animated, d2)

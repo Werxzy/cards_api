@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-10 07:52:05",revision=14043]]
+--[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-10 08:58:48",revision=14172]]
 
 card_width = 45
 card_height = 60
@@ -6,6 +6,8 @@ card_back = {sprite = 10} -- sprite can be number or userdata
 
 cards_all = {}
 card_shadows_on = true
+
+cards_animated = {}
 
 --function card_new(sprite, x, y, a, w, h, back_sprite)
 function card_new(param)
@@ -216,32 +218,40 @@ end
 
 -- makes a card back sprite that can be updated
 function card_back_animated(func, data)
-	-- this function may need to be changed in the future
-	data.update = function(init, width, height)
-		-- will be true when the card back needs to change resolution or be initilized
-		if init or not data.sprite then
-			data.sprite = userdata("u8", width, height)
+	
+	return function(width, height)
+		local d2 = {param = {}}
+
+		for k,v in pairs(data.param) do
+			d2.param[k] = v
 		end
 		
-		-- prepare card art to be updated
-		set_draw_target(data.sprite)
-		camera(-2,-2)
-		card_art_width, card_art_height = card_width-4, card_height-4
-		clip(2,2, card_art_width, card_art_height)
+		d2.sprite = userdata("u8", width, height)
+		d2.param.target_sprite = d2.sprite
 		
-		local upd = func(init, data)
-		
-		camera()
-		clip()
-		if upd then -- add card border
-			nine_slice(25, 0, 0, card_width, card_height, 0)
+		d2.param.sprite = function(w, h)
+			func(data, w, h)
 		end
 		
-		set_draw_target()
+		d2.update = function()			
+			card_gen_back(data.param)
+		end
 		
+		d2.destroy = function()
+			del(cards_animated, d2)
+		end
+						
+		if type(data.init) == "function" then
+			data.init()
+		end
+		
+		return add(cards_animated, d2)
 	end
-	
-	data.update(true)
-	
-	return data
+		
+end
+
+function card_back_animated_update()
+	for c in all(cards_animated) do
+		c.update()
+	end
 end

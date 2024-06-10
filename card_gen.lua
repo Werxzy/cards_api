@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-23 23:52:47",modified="2024-06-10 07:52:05",revision=1469]]
+--[[pod_format="raw",created="2024-03-23 23:52:47",modified="2024-06-10 08:58:48",revision=1605]]
 
 local default_suits = {
 	--"Spades",
@@ -160,7 +160,7 @@ function card_gen_back(param)
 	local top = param.top or 2
 	local bottom = param.bottom or 2
 	
-	local new_sprite = userdata("u8", width, height)
+	local new_sprite = param.target_sprite or userdata("u8", width, height)
 	set_draw_target(new_sprite)
 	
 	local ty = type(sprite)
@@ -173,14 +173,15 @@ function card_gen_back(param)
 	
 	if ty == "function" then
 		camera(-left,-right)
-		clip(2,2, card_art_width, card_art_height)
-		sprite()
+		clip(left, right, w2, h2)
+		sprite(w2, h2)
 		camera()
 		clip()
 		
 	elseif ty == "userdata" then		
 		sspr(sprite, 
-			(sprite:width() - width)\2 + left,(sprite:height() - height)\2 + top, 
+			(sprite:width() - width)\2 + left,
+			(sprite:height() - height)\2 + top, 
 			w2,h2, 
 			left,top)
 	end

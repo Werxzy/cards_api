@@ -1,7 +1,6 @@
---[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-09 01:25:38",revision=14530]]
+--[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-10 11:14:27",revision=14577]]
 
 stacks_all = {}
-stack_border = 3
 
 --[[
 Stacks are essentially tables containing cards.
@@ -28,6 +27,10 @@ function stack_new(sprites, x, y, param)
 		sprites = type(sprites) == "table" and sprites or {sprites},
 		x_to = x,
 		y_to = y,
+		x_off = param.offset or -3,
+		y_off = param.offset or -3,
+		width = 45,
+		height = 60,
 		cards = {},
 		perm = true,
 		top_most = 0,
@@ -54,7 +57,7 @@ end
 function stack_draw(s)
 	if s.perm then
 		-- TODO: remove stack_border, make it a property of stacks (x and y)
-		local x, y = s.x_to - stack_border, s.y_to - stack_border
+		local x, y = s.x_to + s.x_off, s.y_to + s.y_off
 		for sp in all(s.sprites) do
 			spr(sp, x, y)
 		end

@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-10 11:00:49",revision=16214]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-10 11:14:27",revision=16260]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
@@ -370,32 +370,31 @@ end
 -- returns a distance to the stack if they overlap
 function held_overlaps_stack(h, s)
 	local y = stack_y_pos(s)
-	
-	--TODO: adjust this to make more sense
-	
-	local c = h.cards[1]	
-	local width, height = c.width, c.height
+	local c = h.cards[1] -- expects there to be a card in the held stack
 	
 	if point_box(
-		h.x_to + width/2, 
-		h.y_to + height/2, 
-		s.x_to - width*0.25, 
-		y - height*0.125, 
-		width*1.5, height*1.25) then
+		-- point
+		h.x_to + c.width/2, 
+		h.y_to + c.height/2,
+		-- overlaps box (top left corner)
+		s.x_to - s.width*0.25, 
+		y - s.height*0.125, 
+		-- box size (extended)
+		s.width*1.5, s.height*1.25) then
 		
 		return abs(h.x_to - s.x_to) + abs(h.y_to - y)
 	end
 end
 
 function card_overlaps_card(a, b)
-
-	--TODO: adjust this to make more sense
-
 	if point_box(
+		-- point
 		a.x_to + a.width/2, 
-		a.y_to + a.height/2, 
+		a.y_to + a.height/2,
+		-- overlaps box (top left corner) 
 		b.x_to - b.width * 0.25, 
-		b.y_to - b.height * 0.125, 
+		b.y_to - b.height * 0.125,
+		-- box size (extended) 
 		b.width * 1.5, b.height * 1.25) then
 		
 		return abs(a.x_to - b.x_to) + abs(a.y_to - b.y_to)

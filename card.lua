@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-09 07:04:46",revision=13522]]
+--[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-10 07:52:05",revision=14043]]
 
 card_width = 45
 card_height = 60
@@ -7,23 +7,21 @@ card_back = {sprite = 10} -- sprite can be number or userdata
 cards_all = {}
 card_shadows_on = true
 
--- TODO: reorder
-function card_new(sprite, x, y, a, w, h, back_sprite)
-	x = x or 0
-	y = y or 0
-	a = a or 0
+--function card_new(sprite, x, y, a, w, h, back_sprite)
+function card_new(param)
+	local x = param.x or 0
+	local y = param.y or 0
+	local a = param.a or 0
 	
-	w = w or 45
-	h = h or 60
+	local w = param.w or param.width or 45
+	local h = param.h or param.height or 60
 	
--- todo, allow for specifying card back
-
 -- todo??? make a card metatable with a weak reference to a stack
 -- sometimes after a lot of testing, picotron runs out of memory
 -- stacks/cards might not be garbage collected due to referencing eachother
 -- I think this only occurs if exiting in the middle of a game
 
-	-- expects sprite to be a number or userdata
+	-- expects sprite to be a number, userdata, or table with .sprite
 	
 --	!!! if x, y, a or their to values are changed, need to update stack_quick_swap
 	return add(cards_all, {
@@ -43,9 +41,10 @@ function card_new(sprite, x, y, a, w, h, back_sprite)
 		
 		width = w,
 		height = h,
+		wh_key = tostr(w) .. "," .. tostr(h),
 		
-		sprite = sprite,
-		back_sprite = back_sprite,
+		sprite = param.sprite,
+		back_sprite = param.back_sprite,
 		shadow = 0
 		})
 	
@@ -55,26 +54,27 @@ end
 -- shifts vertical lines of pixels to give the illusion if the card turning
 function card_draw(c)
 	local facing_down = (c.a()-0.45) % 1 < 0.1 -- facing 45 degree limit for facing down
-	local sprite = facing_down and card_back.sprite or c.sprite
+--	local sprite = facing_down and card_back.sprite or c.sprite
+	local sprite = facing_down and c.back_sprite or c.sprite
 	
-	if(type(sprite) == "table") sprite = sprite.sprite
-
-	local x, y, width, height = c.x() + c.x_offset(), c.y() + c.y_offset(), card_width, card_height
+	local x, y, width, height = c.x() + c.x_offset(), c.y() + c.y_offset(), c.width, c.height
 	local angle = (c.x"vel" + c.x_offset"vel") / -100 + c.a()
 	--local angle = c.a()
 		
 	local dx, dy = cos(angle), -sin(angle)*0.5
 	if dx < 0 then
-		sprite = card_back.sprite
+		sprite = c.back_sprite
 		dx = -dx
 		dy = -dy
 	end
+	
+	if(type(sprite) == "table") sprite = sprite.sprite
 
 	if	card_shadows_on then
 		card_shadow_draw(c, x, y, width, height, dx, dy)
 	end
 
-	if abs(dy*card_width) < 1 then
+	if abs(dy*c.width) < 1 then
 		sspr(sprite, 0, 0, width, height, x, y)
 	else
 		local x = x - dx*width/2 + width/2
@@ -108,7 +108,7 @@ function card_shadow_draw(c, x, y, width, height, dx, dy)
 	if c.shadow > 0 then
 		
 		local xx = x - dx*width/2 + width/2
-		local x1, y1, x2, y2 = xx, y+7 + height/3, xx+width*dx-1, y+height+6 + abs(dy)*card_width/3 - (1-c.shadow) * 10
+		local x1, y1, x2, y2 = xx, y+7 + height/3, xx+width*dx-1, y+height+6 + abs(dy)*c.width/3 - (1-c.shadow) * 10
 		local xmid = (x1+x2)/2
 		x1 = min(x1, xmid-7)
 		x2 = max(x2, xmid+7)
@@ -217,10 +217,10 @@ end
 -- makes a card back sprite that can be updated
 function card_back_animated(func, data)
 	-- this function may need to be changed in the future
-	data.update = function(init)
+	data.update = function(init, width, height)
 		-- will be true when the card back needs to change resolution or be initilized
 		if init or not data.sprite then
-			data.sprite = userdata("u8", card_width, card_height)
+			data.sprite = userdata("u8", width, height)
 		end
 		
 		-- prepare card art to be updated

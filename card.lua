@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-10 09:44:09",revision=14361]]
+--[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-10 10:11:05",revision=14445]]
 
 card_width = 45
 card_height = 60
@@ -222,6 +222,9 @@ function card_back_animated(data)
 	local func = data.sprite
 	
 	data.gen = function(width, height)
+		width = width or 45
+		height = height or 60	
+
 		local d2 = {}
 		
 		-- copy all values
@@ -242,7 +245,7 @@ function card_back_animated(data)
 		d2.param.target_sprite = d2.sprite
 		
 		d2.param.sprite = function(w, h)
-			func(data, w, h)
+			func(d2, w, h)
 		end
 		
 		d2.update = function()			

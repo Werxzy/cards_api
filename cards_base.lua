@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-10 11:14:27",revision=16260]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-12 09:40:43",revision=16749]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
@@ -24,10 +24,7 @@ function cards_api_draw()
 	if(game_draw) game_draw(0)
 	
 	foreach(stacks_all, stack_draw)
-	
-	for b in all(buttons_all) do
-		b:draw()
-	end
+	button_draw_all()
 	
 	if(game_draw) game_draw(1)
 		
@@ -74,21 +71,8 @@ function cards_api_mouse_update(interact)
 	camera(cx, cy)
 	mx += cx
 	my += cy
-	
-	function buttons_click() 
-		for b in all(buttons_all) do
-			if b.enabled and b.highlight 
-			and (b.always_active or interact) then
-				b:on_click()
-				clicked = true
-				break
-			end
-		end
-	end
-	
-	for b in all(buttons_all) do
-		b.highlight = not held_stack and point_box(mx, my, b.x, b.y, b.w, b.h)
-	end
+		
+	button_check_highlight(mx, my, held_stack)
 		
 	if interact then
 	
@@ -188,7 +172,7 @@ function cards_api_mouse_update(interact)
 			end
 			
 			if not clicked then
-				buttons_click() 
+				clicked = button_check_click(interact)
 			end
 			
 			if not clicked 
@@ -281,7 +265,7 @@ function cards_api_mouse_update(interact)
 		
 	else -- not interact	
 		if mouse_down&1 == 1 and not held_stack then
-			buttons_click()
+			clicked = button_check_click()
 		end
 		
 		highlighted_last = nil
@@ -324,7 +308,7 @@ function cards_api_clear(keep_func)
 	end
 	cards_all = {}
 	stacks_all = {}
-	buttons_all = {}
+	button_destroy_all()
 	
 	cards_coroutine = nil
 	cards_frozen = false

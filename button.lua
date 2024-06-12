@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-18 02:31:29",modified="2024-06-12 09:40:43",revision=7363]]
+--[[pod_format="raw",created="2024-03-18 02:31:29",modified="2024-06-12 10:43:57",revision=7689]]
 
 -- this could use more work
 -- the purpose is to allow for animated sprite buttons
@@ -29,7 +29,7 @@ end
 function button_check_highlight(mx, my, force_off)
 	local allow = not force_off
 	for b in all(buttons_all) do
-		b.highlight = allow and point_box(mx, my, b.x, b.y, b.w, b.h)
+		b.highlight = b.on_click and allow and point_box(mx, my, b.x, b.y, b.w, b.h)
 	end
 end
 

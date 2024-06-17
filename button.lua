@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-18 02:31:29",modified="2024-06-12 10:43:57",revision=7689]]
+--[[pod_format="raw",created="2024-03-18 02:31:29",modified="2024-06-17 10:06:06",revision=8460]]
 
 -- this could use more work
 -- the purpose is to allow for animated sprite buttons
@@ -93,18 +93,6 @@ function button_center(b, x)
 	b.x = (x or 240) - b.w/2
 end
 
-local empty_target = userdata("u8", 1, 1)
-
-function print_size(t)
-	local old = get_draw_target()
-	set_draw_target(empty_target)
-	
-	local w, h = print(t, 0, -1000)
-	
-	set_draw_target(old)	
-
-	return w, h + 1000
-end
 
 function nine_slice(sprite, x, y, w, h, fillcol)
 	-- expects a 16x16 sprite

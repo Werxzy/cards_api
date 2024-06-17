@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-26 04:14:49",modified="2024-06-10 11:14:27",revision=849]]
+--[[pod_format="raw",created="2024-03-26 04:14:49",modified="2024-06-17 10:06:06",revision=2350]]
 -- returns the key of a searched value inside a table
 -- such that tab[has(tab, val)] == val
 function has(tab, val)
@@ -130,6 +130,18 @@ function quicksort(tab, key)
     qs(tab, 1, #tab)
 end
 
+local empty_target = userdata("u8", 1, 1)
+
+function print_size(t)
+	local old = get_draw_target()
+	set_draw_target(empty_target)
+	
+	local w, h = print(t, 0, -1000)
+	
+	set_draw_target(old)	
+
+	return w, h + 1000
+end
 
 -- THE NORMAL PRINT WRAPPING CANNOT BE TRUSTED
 function print_wrap_prep(s, width)
@@ -140,7 +152,7 @@ function print_wrap_prep(s, width)
 	
 	for w in all(words) do
 		local c2 = current_line == "" and w or current_line .. " " .. w
-		local x = print(c2, 0, -1000)
+		local x = print_size(c2)
 		if x > width then
 			current_line = current_line .. "\n" .. w
 		else
@@ -148,8 +160,7 @@ function print_wrap_prep(s, width)
 			final_w = max(final_w, x)
 		end
 	end
-	local _, final_h = print(current_line, 0, -1000)
-	final_h += 1000
+	local _, final_h = print_size(current_line)
 	
 	return final_w, final_h, current_line
 end

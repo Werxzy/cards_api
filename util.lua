@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-26 04:14:49",modified="2024-06-17 10:06:06",revision=2350]]
+--[[pod_format="raw",created="2024-03-26 04:14:49",modified="2024-06-17 11:32:14",revision=2598]]
 -- returns the key of a searched value inside a table
 -- such that tab[has(tab, val)] == val
 function has(tab, val)
@@ -212,4 +212,45 @@ function folder_traversal(start_dir)
 			exit_dir()
 		end
 	end
+end
+
+function nine_slice(sprite, x, y, w, h, fillcol)
+	sprite = type(sprite) == "number" and get_spr(sprite) or sprite
+	local sp_w, sp_h = sprite:width(), sprite:height()
+	local s_max_w, s_max_h = sp_w\2, sp_h\2 -- size \ 2
+	
+	-- calculate width for each component
+	local w1 = min(s_max_w, w\2)
+	local w3 = min(s_max_w, w - w1)\1
+	local w2 = w - w3 - w1
+	
+	-- calculate height of each component
+	local h1 = min(s_max_h, h\2)
+	local h3 = min(s_max_h, h - h1)\1
+	local h2 = h - h3 - h1
+	
+	-- top (then left, middle, right)
+	sspr(sprite, 0,0, w1,h1, x,y)
+	if(w2 >= 1) sspr(sprite, s_max_w,0, 1,h1, x+w1,y, w2,h1)
+	sspr(sprite, sp_w-w3,0, w3,h1, x+w1+w2,y)
+
+	-- middle
+	if h2 >= 1 then
+		sspr(sprite, 0,s_max_h, w1,1, x,y+h1, w1,h2) -- top left corner
+		
+		if w2 >= 1 then 
+			if fillcol then
+				rectfill(x+w1,y+h1, x+w1+w2-1,y+h1+h2-1, fillcol)
+			else
+				sspr(sprite, s_max_w,s_max_h, 1,1, x+w1,y+h1, w2,h2)
+			end
+		end
+		
+		sspr(sprite, sp_w-w3,s_max_h, w3,1, x+w1+w2,y+h1, w3,h2)
+	end	
+
+	-- bottom
+	sspr(sprite, 0,sp_h-h3, w1,h3, x,y+h1+h2) -- top left corner
+	if(w2 >= 1) sspr(sprite, s_max_w,sp_h-h3, 1,h3, x+w1,y+h1+h2, w2,h3)
+	sspr(sprite, sp_w-w3,sp_h-h3, w3,h3, x+w1+w2,y+h1+h2)
 end

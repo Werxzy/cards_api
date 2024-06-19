@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-10 11:01:19",revision=14521]]
+--[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-19 12:25:10",revision=14590]]
 
 card_back = {sprite = 10} -- sprite can be number or userdata
 
@@ -113,6 +113,8 @@ function card_shadow_draw(c, x, y, width, height, dx, dy)
 		x1 = min(x1, xmid-7)
 		x2 = max(x2, xmid+7)
 		poke(0x5509, 0xff) -- only shadow once on a pixel
+		poke(0x550b, 0xff)
+		-- poke 4/8 here?
 		
 		fillp(0xa5a5a5a5a5a5a5a5)
 	
@@ -136,6 +138,7 @@ function card_shadow_draw(c, x, y, width, height, dx, dy)
 		circfill(xmid,y1,4)
 		
 		poke(0x5509, 0x3f)
+		poke(0x550b, 0x3f)
 	end
 end
 

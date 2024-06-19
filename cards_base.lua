@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-12 09:40:43",revision=16749]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-19 12:25:10",revision=18642]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
@@ -24,13 +24,17 @@ function cards_api_draw()
 	if(game_draw) game_draw(0)
 	
 	foreach(stacks_all, stack_draw)
-	button_draw_all()
+	button_draw_all(1)
 	
 	if(game_draw) game_draw(1)
 		
 	foreach(cards_all, card_draw)
 	
 	if(game_draw) game_draw(2)
+	
+	button_draw_all(2)
+	
+	if(game_draw) game_draw(3)
 end
 
 -- main update function
@@ -153,6 +157,10 @@ function cards_api_mouse_update(interact)
 		-- on mouse press and no held stack
 		if mouse_down&1 == 1 and not held_stack then
 			
+			if not clicked then
+				clicked = button_check_click(2, interact)
+			end	
+	
 			if not cards_frozen 
 			and hover_last 
 			and hover_last.ty == "card" then	
@@ -172,7 +180,7 @@ function cards_api_mouse_update(interact)
 			end
 			
 			if not clicked then
-				clicked = button_check_click(interact)
+				clicked = button_check_click(1, interact)
 			end
 			
 			if not clicked 
@@ -265,7 +273,12 @@ function cards_api_mouse_update(interact)
 		
 	else -- not interact	
 		if mouse_down&1 == 1 and not held_stack then
-			clicked = button_check_click()
+			if not clicked then
+				clicked = button_check_click(2)
+			end
+			if not clicked then
+				clicked = button_check_click(1)
+			end
 		end
 		
 		highlighted_last = nil
@@ -329,7 +342,7 @@ function cards_api_shadows_enable(enable)
 		if enable then
 		--	poke(0x5508, 0xff) -- read
 		--	poke(0x550a, 0xff) -- target sprite
-			poke(0x550b, 0xff) -- target shapes
+			poke(0x550b, 0x3f) -- target shapes
 			
 			-- shadow mask color
 			for i, b in pairs{0,1,21,19,20,21,22,6,24,25,9,27,16,18,13,31,1,16,2,1,21,1,5,14,2,4,11,3,12,13,2,4} do
@@ -344,7 +357,7 @@ function cards_api_shadows_enable(enable)
 		else
 		--	poke(0x5508, 0x3f) -- read
 		--	poke(0x550a, 0x3f) -- target sprite
-			poke(0x550b, 0x3f) -- target shapes
+		--	poke(0x550b, 0x3f) -- target shapes
 			-- todo, reset color table (probably not necessary
 		end
 	end

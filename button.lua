@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-18 02:31:29",modified="2024-06-19 12:25:10",revision=9285]]
+--[[pod_format="raw",created="2024-03-18 02:31:29",modified="2024-06-19 14:20:20",revision=9608]]
 
 -- this could use more work
 -- the purpose is to allow for animated sprite buttons
@@ -11,10 +11,8 @@ buttons_all = {
 
 function button_draw_all(group)
 	local buttons = buttons_all[group]
-	for i = 1,2 do
-		for b in all(buttons) do
-			b:draw(i)
-		end
+	for b in all(buttons) do
+		b:draw()
 	end
 end
 
@@ -91,18 +89,15 @@ function button_simple_text(t, x, y, on_click)
 	
 	local bn = button_new({
 		x = x, y = y, w = w, h = h, 
-		draw = function(b, layer)
-			if layer == 1 then
-				nine_slice(55, b.x, b.y+3, b.w, b.h)
-				
-			elseif layer == 2 then
-				local click_y = sin(b.ct/2)*3
-				nine_slice(b.highlight and 53 or 54, b.x, b.y-click_y, b.w, b.h)
-				local x, y = b.x+5, b.y+3 - click_y
-				print(t, x, y+1, 32)
-				print(t, x, y, b.highlight and 3 or 19)
-				b.ct = max(b.ct - 0.08)
-			end
+		draw = function(b)
+			nine_slice(55, b.x, b.y+3, b.w, b.h)
+			
+			local click_y = sin(b.ct/2)*3
+			nine_slice(b.highlight and 53 or 54, b.x, b.y-click_y, b.w, b.h)
+			local x, y = b.x+5, b.y+3 - click_y
+			print(t, x, y+1, 32)
+			print(t, x, y, b.highlight and 3 or 19)
+			b.ct = max(b.ct - 0.08)
 		end, 
 		on_click = function (b)
 			b.ct = 1

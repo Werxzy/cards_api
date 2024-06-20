@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-19 12:25:10",revision=18642]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-20 13:43:42",revision=19178]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
@@ -13,7 +13,7 @@ mouse_last_clicked = nil
 
 hover_last = nil
 
-cards_coroutine = nil
+local cards_coroutine = {}
 
 -- main drawing function
 function cards_api_draw()
@@ -42,13 +42,30 @@ function cards_api_update()
 	
 	-- don't accept mouse input when there is a coroutine
 	-- though, coroutines are a bit annoying to debug
-	if cards_coroutine then
-		coresume(cards_coroutine)
+	if #cards_coroutine > 0 then
+		local i = 1
+		while i <= #cards_coroutine do
+			local c = cards_coroutine[i]
+			
+			if(c[3] and i~=1) break -- wait if not first
+			
+			-- run coroutine
+			local co = c[1]
+			coresume(co)
+			if not co or costatus(co) == "dead" then -- exit coroutine
+				deli(cards_coroutine, i)
+			end
+			
+			if(c[2]) break -- stop
+			i += 1
+		end
+
 		cards_api_mouse_update(false)
-		if not cards_coroutine or costatus(cards_coroutine) == "dead" then
-			cards_coroutine = nil
+		if #cards_coroutine == 0 then
 			cards_api_action_resolved()
 		end
+		
+		
 	else
 		cards_api_mouse_update(true)
 	end
@@ -161,7 +178,8 @@ function cards_api_mouse_update(interact)
 				clicked = button_check_click(2, interact)
 			end	
 	
-			if not cards_frozen 
+			if not clicked
+			and not cards_frozen 
 			and hover_last 
 			and hover_last.ty == "card" then	
 				
@@ -306,6 +324,18 @@ function cards_api_action_resolved()
 	end
 end
 
+-- co is a coroutine to run
+-- stop waits for this coroutine to finish before running the next one
+-- wait prevents the coroutine from running unless it's the first
+function cards_api_coroutine_add(co, stop, wait)
+	add(cards_coroutine, {co, stop == nil or stop, wait})
+end
+
+function cards_api_coroutine_clear()
+	cards_coroutine = {}
+end
+
+
 -- allows card interaction
 -- may have more uses in the future
 function cards_api_game_started()
@@ -323,7 +353,7 @@ function cards_api_clear(keep_func)
 	stacks_all = {}
 	button_destroy_all()
 	
-	cards_coroutine = nil
+	cards_api_coroutine_clear()
 	cards_frozen = false
 	
 	if not keep_func then

@@ -179,7 +179,7 @@ function game_setup()
 	-- ...
 
 	-- creates a coroutine to be executed per frame
-	cards_coroutine = cocreate(game_setup_anim)
+	cards_api_coroutine_add(cocreate(game_setup_anim))
 	-- when the coroutine is done, game_action_resolved() will be called if it exists
 end
 

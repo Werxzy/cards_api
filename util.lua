@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-26 04:14:49",modified="2024-06-17 11:32:14",revision=2598]]
+--[[pod_format="raw",created="2024-03-26 04:14:49",modified="2024-06-20 15:24:58",revision=3444]]
 -- returns the key of a searched value inside a table
 -- such that tab[has(tab, val)] == val
 function has(tab, val)
@@ -76,7 +76,7 @@ end
 
 function smooth_angle(pos, damp, acc)
 	local vel = 0
-	return function(to)
+	return function(to, set)
 		if to == "vel" then
 			if set then
 				vel = set

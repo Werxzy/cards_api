@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-19 12:25:10",revision=14590]]
+--[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-20 15:56:43",revision=14834]]
 
 card_back = {sprite = 10} -- sprite can be number or userdata
 
@@ -58,8 +58,10 @@ function card_draw(c)
 	local sprite = facing_down and c.back_sprite or c.sprite
 	
 	local x, y, width, height = c.x() + c.x_offset(), c.y() + c.y_offset(), c.width, c.height
-	local angle = (c.x"vel" + c.x_offset"vel") / -100 + c.a()
-	--local angle = c.a()
+	--local angle = (c.x"vel" + c.x_offset"vel") / -100 + c.a()
+	local angle = c.a()
+	local v = c.x"vel" + c.x_offset"vel"
+	angle += sgn(v) * (0.25 / (abs(v)/10+1) - 0.25)
 		
 	local dx, dy = cos(angle), -sin(angle)*0.5
 	if dx < 0 then
@@ -270,4 +272,24 @@ function card_back_animated_update()
 	for c in all(cards_animated) do
 		c.update()
 	end
+end
+
+function card_position_reset_all()
+	for s in all(stacks_all) do
+		s:reposition()
+	end
+	foreach(cards_all, card_position_reset)
+end
+
+function card_position_reset(card)
+	local s = card.stack
+	if(not s) return
+	
+	card.x("pos", card.x_to)
+	card.y("pos", card.y_to)
+	card.x("vel", 0)
+	card.y("vel", 0)
+
+	card.a("pos", card.a_to)
+	card.a("vel", 0)
 end

@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-24 16:21:08",revision=20483]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-24 17:51:12",revision=20770]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
@@ -55,7 +55,7 @@ function cards_api_update()
 			
 			-- run coroutine
 			local co = c[1]
-			coresume(co)
+			assert(coresume(co))
 			if not co or costatus(co) == "dead" then -- exit coroutine
 				deli(cards_coroutine, i)
 			end

@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-20 15:56:43",revision=14834]]
+--[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-24 17:51:12",revision=15054]]
 
 card_back = {sprite = 10} -- sprite can be number or userdata
 
@@ -6,6 +6,10 @@ cards_all = {}
 card_shadows_on = true
 
 cards_animated = {}
+
+function get_all_cards()
+	return cards_all
+end
 
 --function card_new(sprite, x, y, a, w, h, back_sprite)
 function card_new(param)
@@ -78,6 +82,7 @@ function card_draw(c)
 
 	if abs(dy*c.width) < 1 then
 		sspr(sprite, 0, 0, width, height, x, y)
+		--sspr(sprite, 0, 0, width, 20, x, y) -- example of cutting off cards to save cpu
 	else
 		local x = x - dx*width/2 + width/2
 		local sx = 0

@@ -1,6 +1,18 @@
---[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-10 11:14:27",revision=14577]]
+--[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-24 17:51:12",revision=15304]]
 
 stacks_all = {}
+
+function get_all_stacks()
+	return stacks_all
+end
+
+function get_held_stack()
+	return held_stack
+end
+
+function set_held_stack(stack)
+	held_stack = stack
+end
 
 --[[
 Stacks are essentially tables containing cards.
@@ -110,7 +122,7 @@ function stack_on_click_unstack(...)
 				if(not r(card))return
 			end
 			
-			held_stack = unstack_cards(card)
+			set_held_stack(unstack_cards(card))
 		end
 	end
 end
@@ -262,8 +274,10 @@ end
 
 -- animation for physically shuffle the cards
 function stack_shuffle_anim(stack)
+	local c = stack.cards[1]
+	local w = c and c.width or 45
 	local temp_stack = stack_new(
-		nil, stack.x_to + card_width + 4, stack.y_to, 
+		nil, stack.x_to + w + 4, stack.y_to, 
 		{
 			reposition = stack_repose_static(-0.16), 
 			perm = false
@@ -408,8 +422,9 @@ function stack_repose_hand(x_delta, limit)
 	limit = limit or 200
 	
 	return function(stack, dx)
-	
-		local lim = (limit - card_width) / (#stack.cards + (stack.ins_offset and 1 or 0) - 1)
+		local c = stack.cards[1]
+		
+		local lim = (limit - (c and c.width or 45)) / (#stack.cards + (stack.ins_offset and 1 or 0) - 1)
 		
 		--local x, xd = stack.x_to, min(x_delta, limit / (#stack.cards + (stack.ins_offset and 1 or 0)))
 		local x, xd = stack.x_to, min(x_delta, lim)
@@ -450,7 +465,7 @@ function unstack_hand_card(card)
 	card.stack = new_stack
 	stack_delete_check(old_stack)
 	
-	held_stack = new_stack
+	set_held_stack(new_stack)
 	--return new_stack
 end
 

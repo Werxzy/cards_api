@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-20 13:43:42",revision=19178]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-24 16:21:08",revision=20483]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
@@ -35,6 +35,10 @@ function cards_api_draw()
 	button_draw_all(2)
 	
 	if(game_draw) game_draw(3)
+	
+	button_draw_all(3)
+	
+	if(game_draw) game_draw(4)
 end
 
 -- main update function
@@ -173,6 +177,9 @@ function cards_api_mouse_update(interact)
 	
 		-- on mouse press and no held stack
 		if mouse_down&1 == 1 and not held_stack then
+			if not clicked then
+				clicked = button_check_click(3, interact)
+			end
 			
 			if not clicked then
 				clicked = button_check_click(2, interact)
@@ -193,7 +200,7 @@ function cards_api_mouse_update(interact)
 					hover_last.stack.on_click(hover_last)
 					mouse_last_clicked = hover_last
 				end
-				
+
 				clicked = true
 			end
 			
@@ -291,6 +298,9 @@ function cards_api_mouse_update(interact)
 		
 	else -- not interact	
 		if mouse_down&1 == 1 and not held_stack then
+			if not clicked then
+				clicked = button_check_click(3)
+			end
 			if not clicked then
 				clicked = button_check_click(2)
 			end

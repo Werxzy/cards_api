@@ -1,10 +1,11 @@
---[[pod_format="raw",created="2024-03-18 02:31:29",modified="2024-06-19 14:20:20",revision=9608]]
+--[[pod_format="raw",created="2024-03-18 02:31:29",modified="2024-06-24 16:21:08",revision=10513]]
 
 -- this could use more work
 -- the purpose is to allow for animated sprite buttons
 
 -- group 2 is drawn on top of group 1
 buttons_all = {
+	{},
 	{},
 	{},
 }
@@ -20,9 +21,8 @@ function button_destroy(button)
 	if button.on_destroy then
 		button:on_destroy()
 	end
-	for b in all(buttons_all) do
-		del(b, button)
-	end
+	
+	del(buttons_all[button.group], button)
 end
 
 function button_destroy_all()
@@ -36,9 +36,16 @@ end
 function button_check_highlight(mx, my, force_off)
 	local allow = not force_off
 	
-	for buttons in all(buttons_all) do
-		for b in all(buttons) do
-			b.highlight = b.on_click and allow and point_box(mx, my, b.x, b.y, b.w, b.h)
+	--for buttons in all(buttons_all) do
+		--for b in all(buttons) do
+	for i = #buttons_all, 1, -1 do
+		local buttons = buttons_all[i]
+		
+		for j = #buttons, 1, -1 do
+			local b = buttons[j]
+			b.hit = allow and point_box(mx, my, b.x, b.y, b.w, b.h)
+			b.highlight = b.on_click and b.hit
+			allow = allow and not b.hit
 		end
 	end
 end
@@ -49,7 +56,7 @@ function button_check_click(group, interact)
 	for j = #buttons, 1, -1 do
 		local b = buttons[j]
 		
-		if b.enabled and b.highlight 
+		if b.enabled and b.hit
 		and (b.always_active or interact) then
 			if b.on_click then
 				b:on_click()
@@ -57,6 +64,8 @@ function button_check_click(group, interact)
 			return true
 		end
 	end
+	
+	return false
 end
 
 --function button_new(x, y, w, h, draw, on_click, layer)
@@ -67,10 +76,12 @@ function button_new(param)
 		w = param.w, h = param.h,
 		draw = param.draw,
 		on_click = param.on_click,
+		hit = false,
 		highlight = false,
 		enabled = true,
 		always_active = false,
-		destroy = button_destroy
+		destroy = button_destroy,
+		group = param.group or 1
 	}
 	
 	if param.bottom then

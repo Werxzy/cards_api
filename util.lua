@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-26 04:14:49",modified="2024-06-20 15:24:58",revision=3444]]
+--[[pod_format="raw",created="2024-03-26 04:14:49",modified="2024-06-25 21:48:47",revision=3567]]
 -- returns the key of a searched value inside a table
 -- such that tab[has(tab, val)] == val
 function has(tab, val)
@@ -241,7 +241,7 @@ function nine_slice(sprite, x, y, w, h, fillcol)
 		if w2 >= 1 then 
 			if fillcol then
 				rectfill(x+w1,y+h1, x+w1+w2-1,y+h1+h2-1, fillcol)
-			else
+			elseif fillcol ~= false then
 				sspr(sprite, s_max_w,s_max_h, 1,1, x+w1,y+h1, w2,h2)
 			end
 		end

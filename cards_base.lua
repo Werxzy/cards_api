@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-26 15:17:32",revision=21267]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-26 21:27:13",revision=21485]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
@@ -97,7 +97,7 @@ function cards_api_mouse_update(interact)
 	mx += cx
 	my += cy
 		
-	button_check_highlight(mx, my, held_stack)
+	local layer_hit = button_check_highlight(mx, my, held_stack)
 		
 	if interact then
 	
@@ -153,6 +153,11 @@ function cards_api_mouse_update(interact)
 					end
 				end
 			end	
+		end
+		
+		-- if a button is highlighted, then the cards below should not be hovered
+		if layer_hit >= 2 then
+			hover_new = nil
 		end
 		
 		-- update on what has been hovered

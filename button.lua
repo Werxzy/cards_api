@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-18 02:31:29",modified="2024-06-24 16:47:09",revision=10598]]
+--[[pod_format="raw",created="2024-03-18 02:31:29",modified="2024-06-26 21:27:13",revision=10761]]
 
 -- this could use more work
 -- the purpose is to allow for animated sprite buttons
@@ -35,6 +35,7 @@ end
 
 function button_check_highlight(mx, my, force_off)
 	local allow = not force_off
+	local layer_hit = force_off and 0 or nil
 	
 	--for buttons in all(buttons_all) do
 		--for b in all(buttons) do
@@ -47,7 +48,14 @@ function button_check_highlight(mx, my, force_off)
 			b.highlight = b.on_click and b.hit
 			allow = allow and not b.hit
 		end
+		
+		-- find the highest layer highlighted
+		if not allow and not layer_hit then
+			layer_hit = i
+		end
 	end
+	
+	return layer_hit or 0
 end
 
 function button_check_click(group, interact)	

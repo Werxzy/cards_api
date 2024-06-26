@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-24 17:51:12",revision=15054]]
+--[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-24 20:20:37",revision=15075]]
 
 card_back = {sprite = 10} -- sprite can be number or userdata
 

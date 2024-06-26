@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-23 23:52:47",modified="2024-06-10 11:01:07",revision=2033]]
+--[[pod_format="raw",created="2024-03-23 23:52:47",modified="2024-06-17 08:00:23",revision=2541]]
 
 local default_suits = {
 	--"Spades",

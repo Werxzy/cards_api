@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-24 17:51:12",revision=20770]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-26 15:17:32",revision=21267]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
@@ -55,7 +55,7 @@ function cards_api_update()
 			
 			-- run coroutine
 			local co = c[1]
-			assert(coresume(co))
+			assert(coresume(co)) -- TODO, make this error be presented betters
 			if not co or costatus(co) == "dead" then -- exit coroutine
 				deli(cards_coroutine, i)
 			end
@@ -146,9 +146,7 @@ function cards_api_mouse_update(interact)
 				-- check stacks instead
 				if not hover_new then
 					for s in all(stacks_all) do
-						-- TODO stacks should have a set width and height
-					--	if point_box(mx, my, s.x_to, s.y_to, s.width, s.height) then
-						if point_box(mx, my, s.x_to, s.y_to, 45, 60) then
+						if point_box(mx, my, s.x_to, s.y_to, s.width, s.height) then
 							hover_new = s
 							break
 						end

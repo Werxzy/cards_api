@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-24 17:51:12",revision=15304]]
+--[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-24 20:20:37",revision=15329]]
 
 stacks_all = {}
 
@@ -68,7 +68,6 @@ end
 -- always drawn below cards
 function stack_draw(s)
 	if s.perm then
-		-- TODO: remove stack_border, make it a property of stacks (x and y)
 		local x, y = s.x_to + s.x_off, s.y_to + s.y_off
 		for sp in all(s.sprites) do
 			spr(sp, x, y)
@@ -449,7 +448,6 @@ function unstack_hand_card(card)
 		return
 	end
 	
-	-- TODO? would rather not have to do this
 	card.x_offset_to = 0
 	card.y_offset_to = 0
 	card.hovered = false

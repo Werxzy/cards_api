@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-26 21:27:13",revision=21485]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-28 01:12:12",revision=21503]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
@@ -341,6 +341,10 @@ end
 -- stop waits for this coroutine to finish before running the next one
 -- wait prevents the coroutine from running unless it's the first
 function cards_api_coroutine_add(co, stop, wait)
+	if type(co) == "function" then
+		co = cocreate(co)
+	end
+	assert(type(co) == "thread", "The first parameter must be a coroutine or function")
 	add(cards_coroutine, {co, stop == nil or stop, wait})
 end
 
@@ -377,8 +381,32 @@ function cards_api_clear(keep_func)
 	end
 end
 
-function cards_api_shadows_enable(enable)
+function cards_api_shadows_enable(enable, remap)
 	
+	cards_shadows_enabled = enable
+	remap = remap or {0,1,21,19,20,21,22,6,24,25,9,27,16,18,13,31,1,16,2,1,21,1,5,14,2,4,11,3,12,13,2,4}
+
+	if enable then
+		poke(0x550b, 0x3f) -- target shapes
+		
+		-- shadow mask color
+		for i, b in pairs(remap) do
+			-- bit 0x40 is to change the table color to prevent writing onto shaded areas
+			-- kinda like some of the old shadow techniques in 3d games
+			poke(0x8000 + 32*64 + i-1, 0x40|b)
+		end
+		
+	else
+		poke(0x550b, 0x0) -- target shapes
+
+		-- resets the colors
+		for i, b in pairs(remap) do
+			poke(0x8000 + 32*64 + i-1, 32)
+		end
+	end
+
+
+	--[[ old version (no idea what is actually needed)
 	if cards_shadows_enabled ~= enable then
 		cards_shadows_enabled = enable
 		
@@ -404,7 +432,7 @@ function cards_api_shadows_enable(enable)
 			-- todo, reset color table (probably not necessary
 		end
 	end
-	
+	]]
 end
 
 -- returns a distance to the stack if they overlap

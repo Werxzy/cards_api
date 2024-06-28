@@ -56,6 +56,8 @@ cards_api_game_started()
 
 -- enabling will make color 32 draw shadows
 cards_api_shadows_enable(enable)
+-- custom remaping of colors (mostly for custom color palettes), color 32 is still reserved for shadows
+cards_api_shadows_enable(enable, {5,4,1,3, ...})
 ```
 
 ## Card Functions
@@ -179,7 +181,7 @@ function game_setup()
 	-- ...
 
 	-- creates a coroutine to be executed per frame
-	cards_api_coroutine_add(cocreate(game_setup_anim))
+	cards_api_coroutine_add(game_setup_anim)
 	-- when the coroutine is done, game_action_resolved() will be called if it exists
 end
 

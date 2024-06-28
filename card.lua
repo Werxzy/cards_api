@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-24 20:20:37",revision=15075]]
+--[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-28 00:42:35",revision=15206]]
 
 card_back = {sprite = 10} -- sprite can be number or userdata
 
@@ -76,7 +76,7 @@ function card_draw(c)
 	
 	if(type(sprite) == "table") sprite = sprite.sprite
 
-	if	card_shadows_on then
+	if card_shadows_on then
 		card_shadow_draw(c, x, y, width, height, dx, dy)
 	end
 

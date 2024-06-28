@@ -68,14 +68,24 @@ You can assign other values like suit and rank to affect behaviours using the ca
 ```lua
 -- returns a table that is added to the 
 -- sprite can be an id or userdata
-local card = card_new(sprite, x, y, a)
+local card = card_new({ ... })
+--[[
+x,y = position of card, usually not needed
+a = angle of card
+width, height = size of card
+sprite = front face sprite of card
+sprite_back = back face sprite of card
+]]
 
--- can assign values to cards
+-- can assign extra values to cards
 card.suit = 1
 card.rank = 1
 
-card.x, card.y -- are set managed automatically by the stack they are in
+card.x, card.y -- draw position of the cards (do not alter)
+card.x_to, card.y_to -- interpolation target, set managed automatically by the stack they are in
 card.a_to = 0 -- card facing angle, 0 = face up, 0.5 = face down
+card.x_offset_to, card.y_offset_to = 0,0 -- extra visual offset that can be applied to cards
+
 
 -- puts the card at the end of the cards table to draw the card on top of everything else
 card_to_top(card)
@@ -96,16 +106,21 @@ stack_border = 3
 get_top_card(stack)
 
 -- returns a new stack and adds it to the main stack table
-local stack = stack_new(sprites, x, y, repos, perm, stack_rule, on_click, on_double)
+local stack = stack_new({ ... })
 --[[
 sprites = table of sprite ids or userdata
 x,y = the top left position of the stack (minus the stack border value)
+x_off,y_off = offset of drawn sprite
 repos = function called when setting the position of the cards
 perm = when false, the stack is removed when it has no cards
 stack_rule = returns true if a second stack is allowed to be placed on this stack
 on_click = function called when the stack base or card in stack is clicked, can be nil, primarily used for unstacking
 on_double = function called when the stack base or card in stack is double clicked, can be nil
 resolve_stack = called when the stack_rule returns true, defaults to stack_cards
+unresolved_stack = called when a stack_rule returns false, defaults to stack_unresolved_return
+top_most = controls draw order of cards between stacks
+on_hover = function called the frame the stack or a card on the stack is hovered by the cursor
+off_hover = function called the frame the stack or card is no longer being hovered by the cursor
 ]]
 
 -- stack.cards[1] is the bottom card

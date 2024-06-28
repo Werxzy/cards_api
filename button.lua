@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-18 02:31:29",modified="2024-06-26 21:27:13",revision=10761]]
+--[[pod_format="raw",created="2024-03-18 02:31:29",modified="2024-06-28 01:12:01",revision=10782]]
 
 -- this could use more work
 -- the purpose is to allow for animated sprite buttons
@@ -44,7 +44,7 @@ function button_check_highlight(mx, my, force_off)
 		
 		for j = #buttons, 1, -1 do
 			local b = buttons[j]
-			b.hit = allow and point_box(mx, my, b.x, b.y, b.w, b.h)
+			b.hit = allow and point_box(mx, my, b.x, b.y, b.width, b.height)
 			b.highlight = b.on_click and b.hit
 			allow = allow and not b.hit
 		end
@@ -81,13 +81,13 @@ function button_new(param)
 	local buttons = buttons_all[param.group or 1]
 	local b = {
 		x = param.x, y = param.y,
-		w = param.w, h = param.h,
+		width = param.width, height = param.height,
 		draw = param.draw,
 		on_click = param.on_click,
 		hit = false,
 		highlight = false,
 		enabled = true,
-		always_active = false,
+		always_active = param.always_active,
 		destroy = button_destroy,
 		group = param.group or 1
 	}
@@ -106,13 +106,14 @@ function button_simple_text(t, x, y, on_click)
 	w += 9
 	h += 4
 	
-	local bn = button_new({
-		x = x, y = y, w = w, h = h, 
+	local button = button_new({
+		x = x, y = y, 
+		width = w, height = h, 
 		draw = function(b)
-			nine_slice(55, b.x, b.y+3, b.w, b.h)
+			nine_slice(55, b.x, b.y+3, b.width, b.height)
 			
 			local click_y = sin(b.ct/2)*3
-			nine_slice(b.highlight and 53 or 54, b.x, b.y-click_y, b.w, b.h)
+			nine_slice(b.highlight and 53 or 54, b.x, b.y-click_y, b.width, b.height)
 			local x, y = b.x+5, b.y+3 - click_y
 			print(t, x, y+1, 32)
 			print(t, x, y, b.highlight and 3 or 19)
@@ -123,11 +124,11 @@ function button_simple_text(t, x, y, on_click)
 			on_click(b)
 		end
 	})
-	bn.ct = 0
+	button.ct = 0
 	
-	return bn
+	return button
 end
 
 function button_center(b, x)
-	b.x = (x or 240) - b.w/2
+	b.x = (x or 240) - b.width/2
 end

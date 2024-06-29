@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-24 20:20:37",revision=15329]]
+--[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-29 19:51:29",revision=15530]]
 
 stacks_all = {}
 
@@ -335,12 +335,21 @@ function stack_update_card_order(stack)
 	end
 end
 
+-- creates a function for returning cards to the top of their old stack
 function stack_unresolved_return(old_stack, held_stack)
 	return function()
 		stack_cards(old_stack, held_stack)
 	end
 end
 
+-- if a stack was unstacked and it wasn't resolved, the _unresolved function will be called
+function stack_apply_unresolved(stack)
+	if stack._unresolved then
+		stack._unresolved()
+		stack._unresolved = nil
+		stack.old_stack = nil
+	end
+end
 
 -- hand specific event functions
 
@@ -358,6 +367,8 @@ function stack_hand_new(sprites, x, y, param)
 		
 		on_hover = hand_on_hover,
 		off_hover = hand_off_hover,
+		
+		width = param.hand_width,
 	}
 	
 	for k,v in pairs(param) do
@@ -443,7 +454,8 @@ function stack_repose_hand(x_delta, limit)
 end
 
 -- designed to pick up a single card
-function unstack_hand_card(card)
+-- TODO, the setting of the held stack should not take place here 
+function unstack_hand_card(card, not_held)
 	if not card then
 		return
 	end
@@ -463,8 +475,10 @@ function unstack_hand_card(card)
 	card.stack = new_stack
 	stack_delete_check(old_stack)
 	
-	set_held_stack(new_stack)
-	--return new_stack
+	if not not_held then 
+		set_held_stack(new_stack)
+	end
+	return new_stack
 end
 
 function hand_on_hover(self, card, held)

@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-28 01:12:12",revision=21503]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-29 19:51:29",revision=21849]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
@@ -282,11 +282,8 @@ function cards_api_mouse_update(interact)
 				-- 		held_stack = nil
 				-- end
 				
-				if held_stack._unresolved then
-					held_stack._unresolved()
-					held_stack._unresolved = nil
-					held_stack.old_stack = nil
-				end
+				
+				stack_apply_unresolved(held_stack)
 				held_stack = nil
 			end
 			cards_api_action_resolved()

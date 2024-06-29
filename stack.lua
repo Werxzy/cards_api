@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-29 19:51:29",revision=15530]]
+--[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-29 20:43:52",revision=15698]]
 
 stacks_all = {}
 
@@ -269,6 +269,7 @@ function stack_collecting_anim(stack_to, ...)
 	stack_shuffle_anim(stack_to)
 	stack_shuffle_anim(stack_to)
 	stack_shuffle_anim(stack_to)
+	stack_quick_shuffle(stack_to)
 end
 
 -- animation for physically shuffle the cards
@@ -296,10 +297,38 @@ function stack_shuffle_anim(stack)
 	
 	del(stacks_all, temp_stack)
 	
-	-- secretly randomize cards a bit
+	stack_update_card_order(stack)
+	
+	pause_frames(20)
+end
+
+function stack_quick_shuffle(stack)
+	local temp, cards = {}, stack.cards
+	local temp_data = {}
+	
+	for c in all(cards) do
+		local d = add(temp_data, {})
+		for k in all{"x","x_to","y","y_to","a","a_to","shadow"} do
+			d[k] = c[k]
+		end
+	end	
+		
+	while #cards > 0 do
+		add(temp, deli(cards, rnd(#cards)\1 + 1))
+	end
+	
+	for i, c in pairs(temp) do
+		for k,v in pairs(temp_data[i]) do
+			c[k] = v
+		end
+		add(cards, c)
+	end
+	
+--[[
+		-- secretly randomize cards a bit
 	local c = #stack.cards
 	if c > 1 then -- must have more than 1 card to swap
-		for i = 1,rnd(2)+9 do
+		for i = 1, rnd(2)+9 do
 			local i, j = 1, 1
 			while i == j do -- guarantee cards are different
 				 i, j = rnd(c)\1 + 1, rnd(c)\1 + 1
@@ -307,10 +336,9 @@ function stack_shuffle_anim(stack)
 			stack_quick_swap(stack,i,j) 
 		end
 	end
+]]
 	
 	stack_update_card_order(stack)
-	
-	pause_frames(20)
 end
 
 -- swaps two cards instantly with no animation

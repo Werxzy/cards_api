@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-28 00:42:35",revision=15206]]
+--[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-29 20:44:39",revision=15404]]
 
 card_back = {sprite = 10} -- sprite can be number or userdata
 
@@ -13,8 +13,8 @@ end
 
 --function card_new(sprite, x, y, a, w, h, back_sprite)
 function card_new(param)
-	local x = param.x or 0
-	local y = param.y or 0
+	local x = param.x or param.stack and param.stack.x_to or 0
+	local y = param.y or param.stack and param.stack.y_to or 0
 	local a = param.a or 0
 	
 	local w = param.w or param.width or 45
@@ -28,7 +28,7 @@ function card_new(param)
 	-- expects sprite to be a number, userdata, or table with .sprite
 	
 --	!!! if x, y, a or their to values are changed, need to update stack_quick_swap
-	return add(cards_all, {
+	local c = add(cards_all, {
 		ty = "card",
 		
 		x = smooth_val(x, 0.7, 0.1), 
@@ -51,7 +51,12 @@ function card_new(param)
 		back_sprite = param.back_sprite,
 		shadow = 0
 		})
-	
+		
+	if param.stack then
+		stack_add_card(param.stack, c)
+	end	
+
+	return c
 end
 
 -- drawing function for cards

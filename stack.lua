@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-29 20:43:52",revision=15698]]
+--[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-30 23:30:20",revision=15768]]
 
 stacks_all = {}
 
@@ -122,6 +122,21 @@ function stack_on_click_unstack(...)
 			end
 			
 			set_held_stack(unstack_cards(card))
+		end
+	end
+end
+
+-- version for the hand stack, picking out a single card
+function stack_hand_on_click_unstack(...)
+	local rules = {...}
+	
+	return function(card)
+		if card then
+			for r in all(rules) do
+				if(not r(card))return
+			end
+			
+			set_held_stack(unstack_hand_card(card, true))
 		end
 	end
 end
@@ -389,7 +404,7 @@ function stack_hand_new(sprites, x, y, param)
 		reposition = stack_repose_hand(param.hand_max_delta, param.hand_width),
 		
 		--can_stack = function() return true end,
-		on_click = unstack_hand_card,
+		on_click = stack_hand_on_click_unstack(),
 		resolve_stack = stack_insert_cards,
 		unresolved_stack = stack_unresolved_return_rel_x,
 		
@@ -482,8 +497,9 @@ function stack_repose_hand(x_delta, limit)
 end
 
 -- designed to pick up a single card
--- TODO, the setting of the held stack should not take place here 
-function unstack_hand_card(card, not_held)
+-- store_offset is primarily for the hand stack itself, for keeping the insert position when a card is picked up.
+-- (normally it doesn't look right)
+function unstack_hand_card(card, store_offset)
 	if not card then
 		return
 	end
@@ -496,16 +512,15 @@ function unstack_hand_card(card, not_held)
 	local new_stack = stack_held_new(old_stack, card)
 	new_stack.old_pos = has(old_stack.cards, card)
 	new_stack._unresolved = old_stack:unresolved_stack(new_stack, has(old_stack.cards, card))
-	old_stack.ins_offset = new_stack.old_pos
+	if store_offset then
+		old_stack.ins_offset = new_stack.old_pos
+	end
 	
 	-- moves card to new stack
 	add(new_stack.cards, del(old_stack.cards, card))
 	card.stack = new_stack
 	stack_delete_check(old_stack)
 	
-	if not not_held then 
-		set_held_stack(new_stack)
-	end
 	return new_stack
 end
 
@@ -514,7 +529,6 @@ function hand_on_hover(self, card, held)
 	if held then
 		-- shift cards and insert held stack into cards_all order
 		self.ins_offset = hand_find_insert_x(self, held)
-		--self.ins_offset = has(self.cards, card) -- something like this??
 		cards_into_stack_order(self, held, self.ins_offset)
 
 	else

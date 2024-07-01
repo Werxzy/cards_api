@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-06-30 23:30:20",revision=15768]]
+--[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-07-01 00:19:46",revision=15805]]
 
 stacks_all = {}
 
@@ -541,9 +541,9 @@ function hand_on_hover(self, card, held)
 end
 
 function hand_off_hover(self, card, held)
+	self.ins_offset = nil
 	if held then
 		-- shift cards and back and put held cards back on top
-		self.ins_offset = nil
 		stack_update_card_order(held)
 	end
 	

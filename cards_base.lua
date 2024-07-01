@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-06-29 19:51:29",revision=21849]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-07-01 00:19:46",revision=21887]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
@@ -170,7 +170,7 @@ function cards_api_mouse_update(interact)
 			if hover_new then
 				cards_api_hover_event(hover_new, true, true)
 			end
-			
+						
 		elseif hover_last then
 			cards_api_hover_event(hover_last, true)
 		end

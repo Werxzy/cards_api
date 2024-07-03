@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-26 04:14:49",modified="2024-06-25 21:48:47",revision=3567]]
+--[[pod_format="raw",created="2024-03-26 04:14:49",modified="2024-07-03 18:19:12",revision=3944]]
 -- returns the key of a searched value inside a table
 -- such that tab[has(tab, val)] == val
 function has(tab, val)
@@ -136,11 +136,26 @@ function print_size(t)
 	local old = get_draw_target()
 	set_draw_target(empty_target)
 	
-	local w, h = print(t, 0, -1000)
+	local w, h = print(t, 0, 0)
 	
 	set_draw_target(old)	
 
-	return w, h + 1000
+	return w, h
+end
+
+function print_cutoff(t, lim)
+	local old = get_draw_target()
+	set_draw_target(empty_target)
+	
+	local w = print(t, 0, 0)
+	while w > lim do
+		t = sub(t, 1, #t-4) .. "..."
+		w = print(t, 0, 0)
+	end
+
+	set_draw_target(old)	
+
+	return t
 end
 
 -- THE NORMAL PRINT WRAPPING CANNOT BE TRUSTED

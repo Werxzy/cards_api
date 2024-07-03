@@ -155,7 +155,7 @@ function print_cutoff(t, lim)
 
 	set_draw_target(old)	
 
-	return t
+	return t, w
 end
 
 -- THE NORMAL PRINT WRAPPING CANNOT BE TRUSTED
@@ -177,7 +177,7 @@ function print_wrap_prep(s, width)
 	end
 	local _, final_h = print_size(current_line)
 	
-	return final_w, final_h, current_line
+	return current_line, final_w, final_h
 end
 
 function double_print(s, x, y, c)

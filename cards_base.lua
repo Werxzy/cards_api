@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-07-01 00:19:46",revision=21887]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-07-03 21:58:52",revision=22247]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
@@ -363,6 +363,7 @@ function cards_api_clear(keep_func)
 	for c in all(cards_all) do
 		c.stack = nil
 	end
+	
 	cards_all = {}
 	stacks_all = {}
 	button_destroy_all()

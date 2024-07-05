@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-07-03 21:58:52",revision=22247]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-07-05 07:11:16",revision=22826]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
@@ -13,15 +13,18 @@ mouse_last_clicked = nil
 
 hover_last = nil
 
+local error_count = 0
+
 local cards_coroutine = {}
 
 -- main drawing function
-function cards_api_draw()
+-- wrapped in an error catcher
+local function _cards_api_draw()
 	card_back_animated_update()
 	
 	card_back_last = card_back
 	
-	if(game_draw) game_draw(0)
+	if(game_draw) card_api_call_attempt(game_draw, 0)
 	
 	foreach(stacks_all, stack_draw)
 	button_draw_all(1)
@@ -41,8 +44,12 @@ function cards_api_draw()
 	if(game_draw) game_draw(4)
 end
 
+function cards_api_draw()
+	card_api_call_attempt(_cards_api_draw)
+end
+
 -- main update function
-function cards_api_update()
+local function _cards_api_update()
 	
 	-- don't accept mouse input when there is a coroutine
 	-- though, coroutines are a bit annoying to debug
@@ -55,7 +62,14 @@ function cards_api_update()
 			
 			-- run coroutine
 			local co = c[1]
-			assert(coresume(co)) -- TODO, make this error be presented betters
+			local ok, err = coresume(co)
+			if not ok then
+				cards_api_display_error("*sub-game runtime error", co)
+				cards_api_on_error()
+				
+				return
+			end
+			
 			if not co or costatus(co) == "dead" then -- exit coroutine
 				deli(cards_coroutine, i)
 			end
@@ -80,7 +94,14 @@ function cards_api_update()
 	foreach(cards_all, card_update)	
 	
 	if(game_update) game_update()
+	
+	error_count = max(error_count - 0.01)
 end
+
+function cards_api_update()
+	card_api_call_attempt(_cards_api_update)
+end
+
 
 -- updates mouse interactions
 -- not meant to be called outside
@@ -490,5 +511,45 @@ function cards_api_hover_event(st, hovering, first_frame)
 		elseif st.off_hover then
 			st:off_hover(c, held_stack)
 		end
+	end
+end
+
+function card_api_call_attempt(func, ...)
+	local ok, err = pcall(func, ...)
+	if not ok then
+		cards_api_display_error("*runtime error", err)
+		cards_api_on_error()
+	end
+	return ok
+end
+
+-- called when a major error occurs that would disrupt the game state
+-- aims to allow the game to recover on its own
+function cards_api_on_error()
+	cards_coroutine = {}
+	if not game_on_error or game_on_error() then
+		exit()
+	end
+end
+
+
+-- displays the error to the screen
+function cards_api_display_error(message, err)
+	--the * seems to be important
+	--send_message(3, {event="report_error", content = "*syntax error"})
+	--send_message(3, {event="report_error", content = "*runtime error"})
+		
+	send_message(3, {event="report_error", content = message})
+	if type(err) == "thread" then
+		send_message(3, {event="report_error", content = debug.traceback(err)})	
+	else
+		send_message(3, {event="report_error", content = tostr(err)})		
+	end	
+	
+	-- prevents any error loops that occur
+	error_count += 1
+	if error_count > 30 then
+		notify"continuous error detected"
+		exit()
 	end
 end

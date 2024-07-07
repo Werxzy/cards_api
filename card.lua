@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-06-29 20:44:39",revision=15404]]
+--[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-07-07 09:38:55",revision=15978]]
 
 card_back = {sprite = 10} -- sprite can be number or userdata
 
@@ -6,6 +6,7 @@ cards_all = {}
 card_shadows_on = true
 
 cards_animated = {}
+cards_occlusion = 4 -- extended pixels from the card's size
 
 function get_all_cards()
 	return cards_all
@@ -62,8 +63,12 @@ end
 -- drawing function for cards
 -- shifts vertical lines of pixels to give the illusion if the card turning
 function card_draw(c)
+	-- early exit for occlusion
+	local ot = c._occlusion_type
+	if(c._occlusion_type == "nodraw") return
+	
+
 	local facing_down = (c.a()-0.45) % 1 < 0.1 -- facing 45 degree limit for facing down
---	local sprite = facing_down and card_back.sprite or c.sprite
 	local sprite = facing_down and c.back_sprite or c.sprite
 	
 	local x, y, width, height = c.x() + c.x_offset(), c.y() + c.y_offset(), c.width, c.height
@@ -86,8 +91,31 @@ function card_draw(c)
 	end
 
 	if abs(dy*c.width) < 1 then
-		sspr(sprite, 0, 0, width, height, x, y)
-		--sspr(sprite, 0, 0, width, 20, x, y) -- example of cutting off cards to save cpu
+		-- draw normally
+		if not ot then
+			sspr(sprite, 0, 0, width, height, x, y)
+			
+		-- apply occlusion
+		else
+			local am = c._occlusion_amount
+			local w = abs(c._occlusion_amount) + cards_occlusion
+			if ot == "y" then
+				w = min(height, w)
+				if am > 0 then
+					sspr(sprite, 0, height - w, width, w, x, y+height-w)
+				else
+					sspr(sprite, 0, 0, width, w, x, y)
+				end
+				
+			elseif ot == "x" then
+				w = min(width, w)
+				if am > 0 then
+					sspr(sprite, width-w, 0, w, height, x+width-w, y)
+				else
+					sspr(sprite, 0, 0, w, height, x, y)
+				end
+			end			
+		end
 	else
 		local x = x - dx*width/2 + width/2
 		local sx = 0
@@ -151,6 +179,74 @@ function card_shadow_draw(c, x, y, width, height, dx, dy)
 		
 		poke(0x5509, 0x3f)
 		poke(0x550b, 0x3f)
+	end
+end
+
+-- card overlap optimization setup
+-- currently expects all cards to have a stack and all cards in the stack to be the same size
+-- done just before any card is drawn
+function card_occlusion_update()
+	if cards_occlusion then
+		for s in all(stacks_all) do
+			local cards = all(s.cards)
+			if not s._occlusion_off and #s.cards > 1 then
+				local lc = cards()
+				
+				-- find the first card that isn't changing the angle (tilted is a bit harder to occlude
+				while lc and (lc.x"vel" ~= 0 or lc.a"vel" ~= 0) do
+					lc._occlusion_type = nil
+					lc = cards()
+				end
+			
+				if lc then
+					lc._occlusion_type = nil
+					local lx, ly = (lc.x() + lc.x_offset())\1, (lc.y() + lc.y_offset())\1
+				
+					for c in cards do
+						-- if the card is moving in any way, there should be no occlusion
+						-- however, give the next card a try 
+						if c.x"vel" ~= 0 or c.a"vel" ~= 0 then
+							c._occlusion_type = nil
+							lc._occlusion_type = nil
+							
+						else	
+							local cx, cy = (c.x() + c.x_offset())\1, (c.y() + c.y_offset())\1
+							
+							-- calculate the type of occlusion and the amount
+							if cx == lx then
+								if cy == ly then
+									lc._occlusion_type = "nodraw"
+								else
+									lc._occlusion_type = "y"
+									lc._occlusion_amount = ly - cy
+								end
+							elseif cy == ly then
+								lc._occlusion_type = "x"
+								lc._occlusion_amount = lx - cx
+							else
+								lc._occlusion_type = nil
+							end
+							
+							-- use current card in the next step
+							lc, lx, ly = c, cx, cy
+						end
+					end
+				end
+			end
+			lc = s.cards[#s.cards]
+			-- reset occlusion values for the rest of the cards
+			if lc then
+				lc._occlusion_type = nil
+			end
+			for c in cards do
+				c._occlusion_type = nil
+			end
+		end
+		
+	else
+		for c in all(cards_all) do
+			c._occlusion_type = nil
+		end
 	end
 end
 

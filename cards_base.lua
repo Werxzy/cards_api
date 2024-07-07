@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-07-05 07:11:16",revision=22826]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-07-07 09:38:55",revision=23243]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
@@ -30,7 +30,8 @@ local function _cards_api_draw()
 	button_draw_all(1)
 	
 	if(game_draw) game_draw(1)
-		
+	
+	card_occlusion_update()
 	foreach(cards_all, card_draw)
 	
 	if(game_draw) game_draw(2)

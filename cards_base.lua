@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-07-07 09:38:55",revision=23243]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-07-10 09:33:48",revision=23712]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
@@ -351,7 +351,7 @@ function cards_api_action_resolved()
 	if not cards_frozen and game_win_condition and game_win_condition() then
 		if game_count_win then
 			game_count_win()
-			cards_frozen = true
+			cards_api_set_frozen(true)
 		end
 	end
 end
@@ -375,7 +375,12 @@ end
 -- allows card interaction
 -- may have more uses in the future
 function cards_api_game_started()
-	 cards_frozen = false
+	 cards_api_set_frozen(false)
+end
+
+-- prevents interaction with cards and game specific buttons
+function cards_api_set_frozen(freeze)
+	cards_frozen = freeze
 end
 
 -- clears any objects being stored
@@ -391,7 +396,7 @@ function cards_api_clear(keep_func)
 	button_destroy_all()
 	
 	cards_api_coroutine_clear()
-	cards_frozen = false
+	cards_api_set_frozen(false)
 	
 	if not keep_func then
 		game_update = nil

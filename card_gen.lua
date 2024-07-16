@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-23 23:52:47",modified="2024-06-17 08:00:23",revision=2541]]
+--[[pod_format="raw",created="2024-03-23 23:52:47",modified="2024-07-16 04:24:58",revision=2727]]
 
 local default_suits = {
 	--"Spades",
@@ -80,6 +80,10 @@ function card_gen_standard(param)
 	local rank_chars = param.rank_chars or default_ranks
 	local suit_colors = param.suit_colors or default_suit_colors
 	local suit_pos = param.suit_pos or default_suit_pos
+	local suit_show = param.suit_show or {}
+	while #suit_show < #suit_chars do
+		add(suit_show, true)
+	end
 	
 	local face_sprites = param.face_sprites or default_face_sprites
 	
@@ -105,7 +109,7 @@ function card_gen_standard(param)
 			nine_slice(8, 0, 0, width, height)
 			
 			-- draw rank/suit
-			print(rank_char .. suit_char, 3, 3, col[1])
+			print(rank_char .. (suit_show[rank] and suit_char or ""), 3, 3, col[1])
 			
 			local sp = face_sprites[rank]
 			local pos = suit_pos[rank]

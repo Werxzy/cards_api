@@ -174,7 +174,6 @@ stack_add_card(stack, card, old_stack)
 -- moves cards in an animation (see Animations section below) from given card stacks to "stack_to"
 stack_collecting_anim(stack_to, ...)
 -- example stack_collecting_anim(stack_to_recieve_cards, stack_goal, {stack1, stack2, stack3}, another_stack)
--- uses stack_shuffle_anim three times afterwards
 
 -- does a shuffling animation and randomizes position of cards
 stack_shuffle_anim(stack)

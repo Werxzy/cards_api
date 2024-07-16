@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-07-01 00:19:46",revision=15805]]
+--[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-07-16 06:37:29",revision=16942]]
 
 stacks_all = {}
 
@@ -258,18 +258,27 @@ end
 
 -- move all cards from "..." (stacks or table of stacks) to "stack_to" 
 function stack_collecting_anim(stack_to, ...)
+	local facing = 0.5
+	
 	local function collect(s)
+		if s == stack_to then
+			return
+		end
 		while #s.cards > 0 do
 			local c = get_top_card(s)
 			stack_add_card(stack_to, c)
-			c.a_to = 0.5
+			c.a_to = facing
 			--sfx(3)
 			pause_frames(3)
 		end
 	end
 	
 	for a in all{...} do
-		if type(a) == "table" then
+		local ty = type(a)
+		if ty == "number" then
+			facing = a
+			
+		elseif ty == "table" then
 			if a.cards then -- single stack	
 				collect(a)
 				
@@ -278,13 +287,13 @@ function stack_collecting_anim(stack_to, ...)
 			end
 		end
 	end
+end
 	
-	pause_frames(35)
-
-	stack_shuffle_anim(stack_to)
-	stack_shuffle_anim(stack_to)
-	stack_shuffle_anim(stack_to)
-	stack_quick_shuffle(stack_to)
+function stack_standard_shuffle_anim(stack)
+	stack_shuffle_anim(stack)
+	stack_shuffle_anim(stack)
+	stack_shuffle_anim(stack)
+	stack_quick_shuffle(stack)
 end
 
 -- animation for physically shuffle the cards

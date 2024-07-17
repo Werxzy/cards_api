@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-18 02:31:29",modified="2024-06-28 01:12:01",revision=10782]]
+--[[pod_format="raw",created="2024-03-18 02:31:29",modified="2024-07-17 08:02:54",revision=11202]]
 
 -- this could use more work
 -- the purpose is to allow for animated sprite buttons
@@ -76,26 +76,30 @@ function button_check_click(group, interact)
 	return false
 end
 
---function button_new(x, y, w, h, draw, on_click, layer)
 function button_new(param)
-	local buttons = buttons_all[param.group or 1]
 	local b = {
-		x = param.x, y = param.y,
-		width = param.width, height = param.height,
-		draw = param.draw,
-		on_click = param.on_click,
+		x = 0, y = 0,
+		width = 16, height = 16,
+		--draw = param.draw,
+		--on_click = param.on_click,
 		hit = false,
 		highlight = false,
 		enabled = true,
-		always_active = param.always_active,
+		always_active = false,
 		destroy = button_destroy,
-		group = param.group or 1
 	}
 	
+	param.group = param.group or 1
+	local buttons = buttons_all[param.group or 1]
 	if param.bottom then
 		add(buttons, b, 1)
 	else
 		add(buttons, b)
+	end
+	param.bottom = nil
+	
+	for k,v in pairs(param) do
+		b[k] = v
 	end
 	
 	return b
@@ -106,7 +110,7 @@ function button_simple_text(t, x, y, on_click)
 	w += 9
 	h += 4
 	
-	local button = button_new({
+	return button_new({
 		x = x, y = y, 
 		width = w, height = h, 
 		draw = function(b)
@@ -122,11 +126,9 @@ function button_simple_text(t, x, y, on_click)
 		on_click = function (b)
 			b.ct = 1
 			on_click(b)
-		end
+		end,
+		ct = 0
 	})
-	button.ct = 0
-	
-	return button
 end
 
 function button_center(b, x)

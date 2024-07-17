@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-07-16 06:37:29",revision=16942]]
+--[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-07-17 05:43:27",revision=17004]]
 
 stacks_all = {}
 
@@ -55,13 +55,36 @@ function stack_new(sprites, x, y, param)
 		-- on_hover = ... function(self, card, held_stack, first)
 		-- off_hover = ... function(self, card, held_stack)
 		
+		destroy = stack_destroy
+		-- on_destroy = ...
 	}	
 	
 	for k,v in pairs(param) do
 		s[k] = v
 	end
-
+	
 	return add(stacks_all, s)
+end
+
+-- removes a stack from the game
+-- if cards_too is true, then all cards that were assigned to the stack are also removed from the game
+function stack_destroy(s, cards_too)
+	if s.on_destroy then
+		s:on_destroy()
+	end
+	
+	if cards_too then
+		foreach(s.cards, card_destroy)
+	
+	-- stack no longer exists, so cards' stack must be unassigned
+	else	
+		for c in all(s.cards) do
+			c.stack = nil
+		end
+	end
+	
+	s.cards = {} -- remove references justs in case
+	del(stacks_all, s)
 end
 
 -- drawing function for stacks

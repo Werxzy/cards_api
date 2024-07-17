@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-07-07 09:38:55",revision=15978]]
+--[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-07-17 05:43:27",revision=16115]]
 
 card_back = {sprite = 10} -- sprite can be number or userdata
 
@@ -50,14 +50,30 @@ function card_new(param)
 		
 		sprite = param.sprite,
 		back_sprite = param.back_sprite,
-		shadow = 0
-		})
+		shadow = 0,
+		
+		destroy = card_destroy,
+	})
 		
 	if param.stack then
 		stack_add_card(param.stack, c)
 	end	
 
 	return c
+end
+
+-- removes a card from the game and the stack it belonged to
+function card_destroy(c)
+	if c.on_destroy then
+		c:on_destroy()
+	end
+	
+	if c.stack then
+		del(c.stack, c)
+	end
+	c.stack = nil
+	
+	del(cards_all, s)
 end
 
 -- drawing function for cards

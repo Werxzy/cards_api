@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-07-17 05:43:27",revision=16115]]
+--[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-07-17 07:25:56",revision=16241]]
 
 card_back = {sprite = 10} -- sprite can be number or userdata
 
@@ -18,8 +18,8 @@ function card_new(param)
 	local y = param.y or param.stack and param.stack.y_to or 0
 	local a = param.a or 0
 	
-	local w = param.w or param.width or 45
-	local h = param.h or param.height or 60
+	param.width = param.w or param.width or 45
+	param.height = param.h or param.height or 60
 	
 -- todo??? make a card metatable with a weak reference to a stack
 -- sometimes after a lot of testing, picotron runs out of memory
@@ -44,20 +44,33 @@ function card_new(param)
 		y_offset_to = 0,
 		a_to = a,
 		
-		width = w,
-		height = h,
-		wh_key = tostr(w) .. "," .. tostr(h),
+		--width = w,
+		--height = h,
+		wh_key = tostr(param.w) .. "," .. tostr(param.h),
 		
-		sprite = param.sprite,
-		back_sprite = param.back_sprite,
+		--sprite = param.sprite,
+		--back_sprite = param.back_sprite,
 		shadow = 0,
 		
 		destroy = card_destroy,
 	})
+	
 		
 	if param.stack then
 		stack_add_card(param.stack, c)
+		param.stack = nil
 	end	
+	
+	-- clear values that shouldn't be copied from param
+	param.x = nil
+	param.y = nil
+	param.a = nil
+	param.x_offset = nil
+	param.y_offset = nil
+	
+	for k,v in pairs(param) do
+		c[k] = v
+	end
 
 	return c
 end

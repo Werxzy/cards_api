@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-23 23:52:47",modified="2024-07-16 04:24:58",revision=2727]]
+--[[pod_format="raw",created="2024-03-23 23:52:47",modified="2024-07-17 07:25:18",revision=2758]]
 
 local default_suits = {
 	--"Spades",
@@ -81,7 +81,7 @@ function card_gen_standard(param)
 	local suit_colors = param.suit_colors or default_suit_colors
 	local suit_pos = param.suit_pos or default_suit_pos
 	local suit_show = param.suit_show or {}
-	while #suit_show < #suit_chars do
+	while #suit_show < ranks do
 		add(suit_show, true)
 	end
 	

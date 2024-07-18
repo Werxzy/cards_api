@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-07-10 09:33:48",revision=23712]]
+--[[pod_format="raw",created="2024-03-16 15:34:19",modified="2024-07-16 09:45:54",revision=26683]]
 
 include"cards_api/util.lua"
 include"cards_api/stack.lua"
@@ -50,6 +50,7 @@ function cards_api_draw()
 end
 
 -- main update function
+-- wrapped in an error catcher
 local function _cards_api_update()
 	
 	-- don't accept mouse input when there is a coroutine
@@ -64,10 +65,11 @@ local function _cards_api_update()
 			-- run coroutine
 			local co = c[1]
 			local ok, err = coresume(co)
+
+			-- if error during coroutine
 			if not ok then
 				cards_api_display_error("*sub-game runtime error", co)
 				cards_api_on_error()
-				
 				return
 			end
 			
@@ -96,6 +98,7 @@ local function _cards_api_update()
 	
 	if(game_update) game_update()
 	
+	-- decreases error counter, can help track error loops
 	error_count = max(error_count - 0.01)
 end
 
@@ -186,10 +189,10 @@ function cards_api_mouse_update(interact)
 		if hover_last != hover_new then
 			--notify(tostr(hover_new) .. " " .. (hover_new and hover_new.ty or " "))
 			
-			if hover_last then
+			if hover_last then -- if there was a element that the mouse is no longer hovering
 				cards_api_hover_event(hover_last, false)
 			end
-			if hover_new then
+			if hover_new then -- if there's a new element the mouse is hovering
 				cards_api_hover_event(hover_new, true, true)
 			end
 						
@@ -202,6 +205,7 @@ function cards_api_mouse_update(interact)
 	
 		-- on mouse press and no held stack
 		if mouse_down&1 == 1 and not held_stack then
+			-- first check button groups 3 and then 2 for a click
 			if not clicked then
 				clicked = button_check_click(3, interact)
 			end
@@ -209,7 +213,8 @@ function cards_api_mouse_update(interact)
 			if not clicked then
 				clicked = button_check_click(2, interact)
 			end	
-	
+			
+			-- clicking a card, if possible
 			if not clicked
 			and not cards_frozen 
 			and hover_last 
@@ -229,10 +234,12 @@ function cards_api_mouse_update(interact)
 				clicked = true
 			end
 			
+			-- clicking a button in group 1
 			if not clicked then
 				clicked = button_check_click(1, interact)
 			end
 			
+			-- clicking a stack, if possible
 			if not clicked 
 			and not cards_frozen 
 			and hover_last
@@ -258,28 +265,6 @@ function cards_api_mouse_update(interact)
 		
 		-- mouse release and holding stack
 		if mouse_up&1 == 1 and held_stack then
-			--[[
-			local dist_to_stack, stack_to = 9999
-			--TODO? instead use hover_last, though it can contain cards, though this can be fine?
-			
-			--find closest stack that s:can_stack returns true
-			for s in all(stacks_all) do
-				if s ~= held_stack 
-				and s:can_stack(held_stack) then
-					local d = held_overlaps_stack(held_stack, s)
-					if d and d < dist_to_stack then
-						dist_to_stack, stack_to = d, s
-					end
-				end
-			end
-			
-			if stack_to then -- closest valid stack found, drop stack on top
-				stack_to:resolve_stack(held_stack)
-				held_stack = nil
-			end
-			
-			]]
-			
 			if hover_last then
 				local s, c = nil
 				if hover_last.ty == "stack" then
@@ -311,6 +296,7 @@ function cards_api_mouse_update(interact)
 			cards_api_action_resolved()
 		end
 		
+		-- update stack's position
 		if held_stack then
 			--held_stack.x_to = mx - c.width/2
 			--held_stack.y_to = my - c.height/2
@@ -318,7 +304,7 @@ function cards_api_mouse_update(interact)
 			held_stack.y_to += my - mly
 		end
 		
-	else -- not interact	
+	else -- not interact, only check buttons that are always active
 		if mouse_down&1 == 1 and not held_stack then
 			if not clicked then
 				clicked = button_check_click(3)
@@ -375,7 +361,7 @@ end
 -- allows card interaction
 -- may have more uses in the future
 function cards_api_game_started()
-	 cards_api_set_frozen(false)
+	cards_api_set_frozen(false)
 end
 
 -- prevents interaction with cards and game specific buttons
@@ -398,6 +384,7 @@ function cards_api_clear(keep_func)
 	cards_api_coroutine_clear()
 	cards_api_set_frozen(false)
 	
+	-- TODO: remove or expand?
 	if not keep_func then
 		game_update = nil
 		game_draw = nil
@@ -479,6 +466,7 @@ function held_overlaps_stack(h, s)
 	end
 end
 
+-- checks if two cards are overlapping, with a degree of inaccuracy allowed for better player use
 function card_overlaps_card(a, b)
 	if point_box(
 		-- point
@@ -520,6 +508,8 @@ function cards_api_hover_event(st, hovering, first_frame)
 	end
 end
 
+-- calls a function, preventing an error from halting the entire program
+-- calls cards_api_on_error to determine what to do after the error
 function card_api_call_attempt(func, ...)
 	local ok, err = pcall(func, ...)
 	if not ok then

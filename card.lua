@@ -1,6 +1,4 @@
---[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-07-17 07:25:56",revision=16241]]
-
-card_back = {sprite = 10} -- sprite can be number or userdata
+--[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-07-17 14:56:47",revision=16273]]
 
 cards_all = {}
 card_shadows_on = true
@@ -12,7 +10,32 @@ function get_all_cards()
 	return cards_all
 end
 
---function card_new(sprite, x, y, a, w, h, back_sprite)
+
+--[[
+creates and returns a card
+
+param is a table that can have the following key values
+
+x, y = position of card, though this usually isn't needed
+	if param.stack is provided, then 
+a = starting angle of the 
+	0 = face up
+	0.5 = face down
+width, height = size of the card, usually should match the size of the card sprite
+sprite = front face sprite of card, can be a sprite id or userdata
+sprite_back = back face sprite of card, can be a sprite id or userdata
+stack = stack the card will be place in
+on_destroy = called when the card is to be destroyed
+
+additional parameters can be provided to give the stack more properties
+
+x, y, a, x_offset, y_offset, should not be altered directly after creating the card
+instead use x_to, y_to, a_to
+x, y, a, x_offset, y_offset, are assigned smooth_val, which are allowed to be called like a function
+	see util.lua
+
+x_offset_to, y_offset_to = extra offsets for when drawing the card
+]]
 function card_new(param)
 	local x = param.x or param.stack and param.stack.x_to or 0
 	local y = param.y or param.stack and param.stack.y_to or 0
@@ -46,7 +69,7 @@ function card_new(param)
 		
 		--width = w,
 		--height = h,
-		wh_key = tostr(param.w) .. "," .. tostr(param.h),
+		wh_key = tostr(param.width) .. "," .. tostr(param.height),
 		
 		--sprite = param.sprite,
 		--back_sprite = param.back_sprite,
@@ -416,6 +439,7 @@ function card_position_reset_all()
 	foreach(cards_all, card_position_reset)
 end
 
+-- instantly places the card to it's target position
 function card_position_reset(card)
 	local s = card.stack
 	if(not s) return

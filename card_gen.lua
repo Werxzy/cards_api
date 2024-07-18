@@ -1,4 +1,6 @@
---[[pod_format="raw",created="2024-03-23 23:52:47",modified="2024-07-17 07:25:18",revision=2758]]
+--[[pod_format="raw",created="2024-03-23 23:52:47",modified="2024-07-17 08:08:51",revision=2840]]
+
+-- defaults were originally designed for Picotron Solitaire Suite
 
 local default_suits = {
 	--"Spades",
@@ -34,7 +36,7 @@ local default_ranks = {
 	"Z",
 }
 
--- text, dark, medium, light
+-- [suit] = text, dark, medium, light
 local default_suit_colors = {
 	{16, 1,16,12},
 	{8, 24,8,14},
@@ -44,7 +46,7 @@ local default_suit_colors = {
 	{13, 18,13,29}
 }
 
--- x left, middle, right = {9, 19, 29}
+-- [rank] = {{x,y}, ...}
 local default_suit_pos = {
 	{{19, 28}},
 	{{19, 17}, {19, 39}},
@@ -58,19 +60,51 @@ local default_suit_pos = {
 	{{9, 18},{9, 29},{9, 40}, {19, 13},{19, 24},{19, 35},{19, 46}, {29, 18},{29, 29},{29, 40}},	
 }
 
+-- [rank] = sprite OR {sprite, sprite, ...} (number of sprites equal to suits)
 local default_face_sprites = {
+-- ace
 	[1] = {67,68,69,70,71},
+
+-- face cards
 	[11] = 66,
 	[12] = 65,
 	[13] = 64
 }
 
 --[[
-function card_gen_standard(suits, ranks, 
-	suit_chars, rank_chars, suit_colors, face_sprites,
-	icon_pos)
+generates and returns a table of tables of sprites based on a the given param table
+type(sprites[suit][rank]) == "userdata"
+
+param can take the following values
+suit = number of suites
+	defaults 4
+ranks = number of ranks for all suits
+	includes face cards
+	defaults 13
+suit_chars = table of strings that will be drawn on each sprite of that suit
+	defaults to default_suits
+rank_chars = table of strings that will be drawn on each sprite of that rank
+	defaults to default_ranks
+suit_colors = table of colors that will be used for what's drawn on the sprite based on the suit
+	defaults to suit_colors
+suit_pos = table of locations of the suit sprites from suit_chars, where the index is the rank of the card
+	indicies can be empty
+	defaults to default_suit_pos
+suit_show = table of booleans for if the suit sprite should be drawn in the top left
+	any missing booleans default to true
+face_sprites = table of sprites to be drawn instead of suit sprites for given ranks
+	for a single rank a table of sprites can be given to be used for each suit
+	when provided, no suit sprites will be drawn
+	indices can be skipped
+	defaults to default_face_sprites
+width = width of the sprites in pixels
+	defaults to 45
+height = height of the sprites in pixels
+	defaults to 60
 ]]
 function card_gen_standard(param)
+	
+	param = param or {}
 
 	-- default values
 	local suits = param.suits or 4
@@ -147,6 +181,20 @@ function card_gen_standard(param)
 	return card_sprites
 end
 
+--[[
+generates and returns a card back sprite based on the given param table
+
+param can take the following values
+
+sprite = sprite drawn in the center of the card back, behind the border
+	defaults to sprite 112, but this should always be replaced
+border = sprite to be used with nineslice to draw at the edge of the generated sprite
+	defaults to sprite 25
+width, height = size of generated sprite, defaults to 45 and 60
+left, right, top, bottom = pixels to cut off param.sprite
+	defaults to 2
+target_sprite = sprite to drawn on, will 
+]]
 function card_gen_back(param)
 
 	-- expects sprite to be 100x100 pixels at least

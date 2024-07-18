@@ -1,15 +1,19 @@
---[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-07-17 05:43:27",revision=17004]]
+--[[pod_format="raw",created="2024-03-16 15:18:21",modified="2024-07-17 14:56:47",revision=17171]]
 
 stacks_all = {}
 
+-- these three functions are primarily to help with env encapsulation
+-- returns all stacks
 function get_all_stacks()
 	return stacks_all
 end
 
+-- returns currently held stack
 function get_held_stack()
 	return held_stack
 end
 
+-- sets the held stack
 function set_held_stack(stack)
 	held_stack = stack
 end
@@ -17,19 +21,43 @@ end
 --[[
 Stacks are essentially tables containing cards.
 Each stack has a set of rules for how cards interact with it.
+stack_new() returns a table that has been added to stack_all.
 
-sprites = table of sprite ids or userdata to be drawn with sspr
+sprites = table of sprite ids or userdata to be drawn with spr
 x,y = top left position of stack
+	will be assigned to x_to and y_to
+
+param is a table that can have the following key values
+
+x_off, y_off = draw offsets of the stack's sprite(s)
 reposition = function called when changing the target position of the cards
-perm = if the stack is removed when there is no more cards
+	the function usually assigns all cards .x_to and .y_to values relative to the stack's position
+	defaults to stack_repose_normal
+perm = the stack is destroyed when there are no more cards if this is not set trues
+	defaults to true
 top_most = controls the draw order of cards between stacks
+	the higher the number, the higher the stack
+	defaults to 0
 can_stack = function called when another stack of cards is placed on top (with restrictions)
+	function(self, held)
+	returns true if the "held" can be placed on top of "self"
 on_click = function called when stack base or card in stack is clicked
-on_double = function caled when stack base or card in stack is double clicked
+	usually set to stack_on_click_unstack(...)
+on_double = function called when stack base or card in stack is double clicked
 resolve_stack = function called when can_stack returns true
+	defaults to stack_cards
 unresolved_stack = function called when a held card is released, but isn't placed onto a stack
+	defaults to stack_unresolved_return
 on_hover = function called when the cursor over the stack or card
+	function(self, card, held)
+	self = current stack
+	card = the hovered card
+	held = stack that is being held by the player
 off_hover = function called when the cursor is no longer over the stack or card
+	similar function to on_hover, called before the next on_hover function is called
+on_destroy = function called when the stack is destroyed
+
+additional parameters can be provided to give the stack more properties
 ]]
 
 function stack_new(sprites, x, y, param)
@@ -52,7 +80,7 @@ function stack_new(sprites, x, y, param)
 		on_double = on_double,
 		resolve_stack = stack_cards,
 		unresolved_stack = stack_unresolved_return,
-		-- on_hover = ... function(self, card, held_stack, first)
+		-- on_hover = ... function(self, card, held_stack)
 		-- off_hover = ... function(self, card, held_stack)
 		
 		destroy = stack_destroy
@@ -107,10 +135,11 @@ function stack_cards(stack, stack2)
 	end
 	stack2.old_stack = nil
 	if not stack2.perm then
-		del(stacks_all, stack2)
+		stack2:destroy()
 	end
 end
 
+-- pushes each of the cards in the given stack to the top of the card draw order
 function stack_to_top(stack)
 	foreach(stack.cards, card_to_top)
 	--for c in all(stack2.cards) do
@@ -118,6 +147,7 @@ function stack_to_top(stack)
 	--end
 end
 
+-- inserts cards from stack2 into stack, starting from position i
 function insert_cards(stack, stack2, i)
 	
 	-- determines where the cards will be reordered inside cards_all
@@ -255,7 +285,7 @@ end
 -- deletes a stack if it has no cards and if it is not permanent
 function stack_delete_check(stack)
 	if #stack.cards == 0 and not stack.perm then
-		del(stacks_all, stack)
+		stack:destroy()
 	end	
 end
 
@@ -344,11 +374,12 @@ function stack_shuffle_anim(stack)
 	
 	del(stacks_all, temp_stack)
 	
-	stack_update_card_order(stack)
+	stack_to_top(stack)
 	
 	pause_frames(20)
 end
 
+-- randomizes the position of all the cards in the stack, while preventing any odd jumps in the cards
 function stack_quick_shuffle(stack)
 	local temp, cards = {}, stack.cards
 	local temp_data = {}
@@ -385,11 +416,11 @@ function stack_quick_shuffle(stack)
 	end
 ]]
 	
-	stack_update_card_order(stack)
+	stack_to_top(stack)
 end
 
 -- swaps two cards instantly with no animation
--- will need to call stack_update_card_order to fix the draw order
+-- will need to call stack_to_top to fix the draw order
 function stack_quick_swap(stack, i, j)
 	local c1, c2 = stack.cards[i], stack.cards[j]
 	if(not c1 or not c2) return -- not the same
@@ -403,12 +434,6 @@ function stack_quick_swap(stack, i, j)
 	end
 end
 
--- if the draw order of cards in a stack need to be updated
-function stack_update_card_order(stack)
-	for c in all(stack.cards) do
-		card_to_top(c)
-	end
-end
 
 -- creates a function for returning cards to the top of their old stack
 function stack_unresolved_return(old_stack, held_stack)
@@ -522,6 +547,7 @@ function stack_repose_hand(x_delta, limit)
 			c.x_to = x + (stack.ins_offset and stack.ins_offset <= i and xd or 0)
 		
 			c.y_to = stack.y_to
+			-- applies an additional offset to the card if hovered
 			c.y_offset_to = c.hovered and -15 or 0
 			x += xd
 		end
@@ -536,6 +562,7 @@ function unstack_hand_card(card, store_offset)
 		return
 	end
 	
+	-- resets the offset of the card
 	card.x_offset_to = 0
 	card.y_offset_to = 0
 	card.hovered = false
@@ -576,7 +603,7 @@ function hand_off_hover(self, card, held)
 	self.ins_offset = nil
 	if held then
 		-- shift cards and back and put held cards back on top
-		stack_update_card_order(held)
+		stack_to_top(held)
 	end
 	
 	if card then

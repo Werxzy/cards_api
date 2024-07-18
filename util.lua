@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-26 04:14:49",modified="2024-07-03 18:19:12",revision=3944]]
+--[[pod_format="raw",created="2024-03-26 04:14:49",modified="2024-07-17 08:48:22",revision=4048]]
 -- returns the key of a searched value inside a table
 -- such that tab[has(tab, val)] == val
 function has(tab, val)
@@ -41,6 +41,18 @@ function pause_frames(n)
 end
 
 -- maybe stuff these into userdata to evaluate all at once?
+-- Returns a function that tracks a value as a position connected to a spring
+-- pos - initial position
+-- damp - dampening value, 0-1, reduces velocity each use
+-- acc - acc, 0-1, acceleration value
+-- lim - limit distance, that if position reachest the target
+--
+-- x = smooth-val(0, 0.9, 0.2)
+-- x() -- returns current value
+-- x(1) -- moves the value towards the parameter
+-- x("pos", 2) -- sets the value
+-- x("vel") -- returns velocity
+-- x("vel", 2) -- sets the velocity
 function smooth_val(pos, damp, acc, lim)
 	lim = lim or 0.1
 	local vel = 0
@@ -74,6 +86,8 @@ function smooth_val(pos, damp, acc, lim)
 	end
 end
 
+-- same as smooth_val, but isntead for angles
+-- tries to approach the target angle from the closest direction
 function smooth_angle(pos, damp, acc)
 	local vel = 0
 	return function(to, set)
@@ -105,6 +119,7 @@ function smooth_angle(pos, damp, acc)
 	end
 end
 
+-- sorts the table (in place), with a given key
 function quicksort(tab, key)
 	local function qs(a, lo, hi)
 		if lo >= hi or lo < 1 then
@@ -132,33 +147,37 @@ end
 
 local empty_target = userdata("u8", 1, 1)
 
-function print_size(t)
+-- returns the size of the text
+-- safe to use anywhere, even during init()
+function print_size(s)
 	local old = get_draw_target()
 	set_draw_target(empty_target)
 	
-	local w, h = print(t, 0, 0)
+	local w, h = print(s, 0, 0)
 	
 	set_draw_target(old)	
 
 	return w, h
 end
 
-function print_cutoff(t, lim)
+-- cuts off the text and adds "..." so that the text is limited to a given pixel width
+function print_cutoff(s, lim)
 	local old = get_draw_target()
 	set_draw_target(empty_target)
 	
-	local w = print(t, 0, 0)
+	local w = print(s, 0, 0)
 	while w > lim do
-		t = sub(t, 1, #t-4) .. "..."
-		w = print(t, 0, 0)
+		s = sub(s, 1, #s-4) .. "..."
+		w = print(s, 0, 0)
 	end
 
 	set_draw_target(old)	
 
-	return t, w
+	return s, w
 end
 
 -- THE NORMAL PRINT WRAPPING CANNOT BE TRUSTED
+-- wraps text to be limited to a given pixel width
 function print_wrap_prep(s, width)
 	local words = split(s, " ", false)
 	local lines = {}
@@ -180,6 +199,7 @@ function print_wrap_prep(s, width)
 	return current_line, final_w, final_h
 end
 
+-- prints the string with a shadow
 function double_print(s, x, y, c)
 	print(s, x+1, y+1, 6)
 	print(s, x, y, c)
@@ -229,6 +249,10 @@ function folder_traversal(start_dir)
 	end
 end
 
+
+-- draws a sprite with nineslice style
+-- if fillcol is a number, then rectfill will be called instead (cheaper)
+-- if fillcol is false, then nothing will be drawn in the center 
 function nine_slice(sprite, x, y, w, h, fillcol)
 	sprite = type(sprite) == "number" and get_spr(sprite) or sprite
 	local sp_w, sp_h = sprite:width(), sprite:height()

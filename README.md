@@ -99,6 +99,9 @@ x, y, a, x_offset, y_offset, are assigned smooth_val, which are allowed to be ca
 x_offset_to, y_offset_to = extra offsets for when drawing the card
 ]]
 
+-- returns a table with all the cards
+get_all_cards()
+
 -- puts the card at the end of the cards table to draw the card on top of everything else
 card_to_top(card)
 
@@ -118,6 +121,14 @@ card_position_reset_all()
 Most of the mouse interactions with cards are automatically handled through stacks.
 
 ```lua
+-- returns a table with all the stacks
+get_all_stacks()
+
+-- gets and sets the stack currently held by the mouse
+-- though rarely needed, it's important to follow its usage in functions like on_click
+get_held_stack()
+set_held_stack(stack)
+
 -- returns the top card of the stack
 get_top_card(stack)
 

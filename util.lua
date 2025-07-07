@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-26 04:14:49",modified="2024-07-17 08:48:22",revision=4048]]
+--[[pod_format="raw",created="2024-03-26 04:14:49",modified="2025-07-07 06:29:57",revision=4053]]
 -- returns the key of a searched value inside a table
 -- such that tab[has(tab, val)] == val
 function has(tab, val)
@@ -214,6 +214,9 @@ function folder_traversal(start_dir)
 	
 	function exit_dir()
 		current_dir, prev_folder = current_dir:dirname(), current_dir:basename()
+		while current_dir[#current_dir] == "/" do
+			current_dir = sub(current_dir, 1, -2)
+		end
 	end
 	
 	return function(cmd, a)

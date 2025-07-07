@@ -1,4 +1,4 @@
---[[pod_format="raw",created="2024-03-16 12:26:44",modified="2024-07-20 17:49:50",revision=16414]]
+--[[pod_format="raw",created="2024-03-16 12:26:44",modified="2025-07-07 06:21:48",revision=16532]]
 
 cards_all = {}
 card_shadows_on = true
